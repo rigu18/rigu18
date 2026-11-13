@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Control d'entrades</title>
+<style>
+:root{--bg:#0f1114;--card:#191c21;--line:#2a2f36;--tx:#eceff3;--mut:#8a93a1;--ok:#17b26a;--err:#e5484d;--warn:#f0a020;--acc:#8ab4ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0}
+main{max-width:760px;margin:0 auto;padding:16px}
+nav{display:flex;gap:8px;margin-bottom:16px}
+button,input,textarea{font:inherit;color:inherit}
+button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
+button.main{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
+input,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+textarea{min-height:180px;font-family:ui-monospace,monospace}
+.hide{display:none!important}
+.row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.muted{color:var(--mut);font-size:14px}
+#reader{width:100%;max-width:420px;margin:10px auto;border-radius:10px;overflow:hidden}
+#res{margin:16px 0;border-radius:14px;padding:28px 16px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px}
+#res b{display:block;font-size:clamp(34px,10vw,56px);letter-spacing:.5px;line-height:1.1}
+#res span{display:block;margin-top:8px;font-size:18px;word-break:break-all}
+#res.ok{background:var(--ok);border-color:var(--ok);color:#04210f}
+#res.used{background:var(--err);border-color:var(--err);color:#fff}
+#res.bad{background:var(--warn);border-color:var(--warn);color:#2b1a00}
+.stats{display:flex;gap:8px;margin-bottom:12px}
+.stats div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.stats strong{display:block;font-size:26px}
+.rowbtn{padding:4px 8px;font-size:12px;margin:2px}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+.tag{padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
+.t-ok{background:#12372a;color:#5be3a0}.t-used{background:#44181b;color:#ff8a8e}.t-bad{background:#44300a;color:#ffc861}.t-wait{background:#23272e;color:var(--mut)}
+#login{max-width:340px;margin:12vh auto;padding:16px}
+#login input{margin:6px 0}
+.err{color:#ff8a8e;font-size:14px;min-height:20px}
+</style>
+</head>
+<body>
+
+<section id="login" class="hide">
+  <h1>Control d'entrades</h1>
+  <p class="muted">Inicia sessió amb l'usuari que has creat a Firebase.</p>
+  <form id="lf">
+    <input id="em" type="email" placeholder="Correu electrònic" required autocomplete="username">
+    <input id="pw" type="password" placeholder="Contrasenya" required autocomplete="current-password">
+    <div class="err" id="lerr"></div>
+    <button class="main" style="width:100%">Entrar</button>
+  </form>
+</section>
+
+<div id="app" class="hide">
+<header><h1>Control d'entrades</h1><button id="out">Sortir</button></header>
+<main>
+  <nav>
+    <button data-t="scan" class="on">Escanejar</button>
+    <button data-t="imp">Importar</button>
+    <button data-t="list">Llistat</button>
+  </nav>
+
+  <section id="t-scan">
+    <p class="muted">Lector físic: deixa el cursor al camp i escaneja. Mòbil: activa la càmera.</p>
+    <input id="manual" placeholder="Codi de barres (lector físic o escriure a mà + Enter)" autocomplete="off" inputmode="text">
+    <div class="row">
+      <button id="camBtn" class="main">Activar càmera</button>
+    </div>
+    <div id="reader"></div>
+    <div id="res" aria-live="assertive"><b>—</b><span>Esperant un escaneig</span></div>
+    <h3>Últims escanejos</h3>
+    <table><tbody id="recent"></tbody></table>
+  </section>
+
+  <section id="t-imp" class="hide">
+    <p>Enganxa els codis (un per línia, o separats per comes) o puja un fitxer .csv / .txt <b>sense capçalera</b>.</p>
+    <textarea id="codes" placeholder="8412345678901&#10;8412345678902&#10;..."></textarea>
+    <div class="row">
+      <input type="file" id="file" accept=".csv,.txt" style="width:auto">
+      <button id="impBtn" class="main">Importar codis</button>
+    </div>
+    <p id="impMsg" class="muted"></p>
+  </section>
+
+  <section id="t-list" class="hide">
+    <div class="stats">
+      <div><strong id="sTot">0</strong><span class="muted">Total</span></div>
+      <div><strong id="sOk">0</strong><span class="muted">Entrats</span></div>
+      <div><strong id="sPen">0</strong><span class="muted">Pendents</span></div>
+    </div>
+    <div class="row">
+      <input id="addCode" placeholder="Afegir un codi nou...">
+      <button id="addBtn">Afegir</button>
+    </div>
+    <input id="filter" placeholder="Cercar codi...">
+    <table><thead><tr><th>Codi</th><th>Estat</th><th>Hora d'escaneig</th><th>Accions</th></tr></thead><tbody id="rows"></tbody></table>
+  </section>
+</main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {getFirestore,collection,doc,getDoc,getDocs,addDoc,writeBatch,runTransaction,serverTimestamp,onSnapshot,query,orderBy,limit,deleteDoc,updateDoc,setDoc} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ====== 1) ENGANXA AQUÍ LA TEVA CONFIGURACIÓ DE FIREBASE ======
+const firebaseConfig = {
+  apiKey: "AIzaSyBBfBA5-jti0MOUTB1ZhkE1OGydgn-IFQU",
+  authDomain: "gestio-app-code.firebaseapp.com",
+  projectId: "gestio-app-code",
+  storageBucket: "gestio-app-code.firebasestorage.app",
+  messagingSenderId: "198789804887",
+  appId: "1:198789804887:web:17f6bb6c18280442e10412"
+};
+// ===============================================================
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+const fmt = d => d ? d.toLocaleString("ca-ES",{dateStyle:"short",timeStyle:"medium"}) : "";
+const toDate = t => t && t.toDate ? t.toDate() : (t instanceof Date ? t : null);
+let unsubs = [];
+
+/* ---------- Sessió ---------- */
+onAuthStateChanged(auth, user => {
+  $("login").classList.toggle("hide", !!user);
+  $("app").classList.toggle("hide", !user);
+  unsubs.forEach(u => u()); unsubs = [];
+  if (user) { listen(); $("manual").focus(); } else stopCam();
+});
+$("lf").onsubmit = async e => {
+  e.preventDefault(); $("lerr").textContent = "";
+  try { await signInWithEmailAndPassword(auth, $("em").value, $("pw").value); }
+  catch { $("lerr").textContent = "Correu o contrasenya incorrectes."; }
+};
+$("out").onclick = () => signOut(auth);
+
+/* ---------- Pestanyes ---------- */
+document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
+  ["scan","imp","list"].forEach(t => $("t-"+t).classList.toggle("hide", t !== b.dataset.t));
+  if (b.dataset.t !== "scan") stopCam(); else $("manual").focus();
+});
+
+/* ---------- Validació (transacció: evita dobles entrades) ---------- */
+function beep(freq, ms) {
+  try {
+    const c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator();
+    o.frequency.value = freq; o.connect(c.destination); o.start(); setTimeout(() => { o.stop(); c.close(); }, ms);
+  } catch {}
+}
+function show(cls, title, line, code) {
+  const r = $("res"); r.className = cls;
+  r.innerHTML = "<b></b><span></span><span></span>";
+  r.children[0].textContent = title; r.children[1].textContent = line; r.children[2].textContent = code || "";
+  if (cls === "ok") { beep(880, 150); navigator.vibrate && navigator.vibrate(80); }
+  else { beep(200, 450); navigator.vibrate && navigator.vibrate([200,100,200]); }
+}
+async function validate(raw, source) {
+  const code = String(raw).trim();
+  if (!code) return;
+  const ref = doc(db, "tickets", encodeURIComponent(code));
+  let r;
+  try {
+    r = await runTransaction(db, async tx => {
+      const s = await tx.get(ref);
+      if (!s.exists()) return {st: "bad"};
+      const d = s.data();
+      if (d.scanned) return {st: "used", at: toDate(d.scannedAt)};
+      tx.update(ref, {scanned: true, scannedAt: serverTimestamp(), scannedBy: source});
+      return {st: "ok"};
+    });
+  } catch (e) {
+    show("bad", "ERROR DE XARXA", "No s'ha pogut validar. Torna-ho a provar.", code); return;
+  }
+  if (r.st === "ok") show("ok", "VÀLID", "Entrada registrada a les " + fmt(new Date()), code);
+  else if (r.st === "used") show("used", "JA ESCANEJAT", "Escanejat el " + (fmt(r.at) || "fa un moment"), code);
+  else show("bad", "NO EXISTEIX", "Aquest codi no és a la llista d'entrades", code);
+  addDoc(collection(db, "scans"), {code, result: r.st, source, at: serverTimestamp()}).catch(() => {});
+}
+
+/* Lector físic: actua com un teclat i envia Enter al final */
+$("manual").addEventListener("keydown", e => {
+  if (e.key === "Enter") { const v = e.target.value; e.target.value = ""; validate(v, "lector"); }
+});
+$("t-scan").addEventListener("click", e => { if (!["BUTTON","INPUT"].includes(e.target.tagName) && !cam) $("manual").focus(); });
+
+/* ---------- Càmera del mòbil ---------- */
+let cam = null, last = "", lastT = 0;
+async function startCam() {
+  const F = Html5QrcodeSupportedFormats;
+  cam = new Html5Qrcode("reader", {
+    formatsToSupport: [F.CODE_128, F.CODE_39, F.EAN_13, F.EAN_8, F.UPC_A, F.ITF, F.QR_CODE],
+    useBarCodeDetectorIfSupported: true, verbose: false
+  });
+  try {
+    await cam.start({facingMode: "environment"}, {fps: 10, qrbox: {width: 280, height: 140}}, txt => {
+      if (txt === last && Date.now() - lastT < 3000) return; // evita lectures repetides
+      last = txt; lastT = Date.now(); validate(txt, "mòbil");
+    }, () => {});
+    $("camBtn").textContent = "Aturar càmera";
+  } catch (e) {
+    cam = null; show("bad", "CÀMERA NO DISPONIBLE", "Permet l'accés a la càmera al navegador.", "");
+  }
+}
+async function stopCam() {
+  if (cam) { try { await cam.stop(); cam.clear(); } catch {} cam = null; }
+  $("camBtn").textContent = "Activar càmera";
+}
+$("camBtn").onclick = () => cam ? stopCam() : startCam();
+
+/* ---------- Importar ---------- */
+$("file").onchange = async e => { const f = e.target.files[0]; if (f) $("codes").value = await f.text(); };
+$("impBtn").onclick = async () => {
+  const list = [...new Set($("codes").value.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean))];
+  if (!list.length) { $("impMsg").textContent = "No hi ha cap codi."; return; }
+  $("impBtn").disabled = true; $("impMsg").textContent = "Important...";
+  try {
+    const existing = new Set((await getDocs(collection(db, "tickets"))).docs.map(d => d.id));
+    const nous = list.filter(c => !existing.has(encodeURIComponent(c)));
+    for (let i = 0; i < nous.length; i += 400) {
+      const b = writeBatch(db);
+      nous.slice(i, i + 400).forEach(c => b.set(doc(db, "tickets", encodeURIComponent(c)),
+        {code: c, scanned: false, scannedAt: null, createdAt: serverTimestamp()}));
+      await b.commit();
+    }
+    $("impMsg").textContent = `Importats: ${nous.length}. Ja existien (ignorats): ${list.length - nous.length}.`;
+    $("codes").value = "";
+  } catch (e) { $("impMsg").textContent = "Error important: " + e.message; }
+  $("impBtn").disabled = false;
+};
+
+/* ---------- Llistat i historial en temps real ---------- */
+let tickets = [];
+function renderList() {
+  const q = $("filter").value.trim().toLowerCase();
+  const ok = tickets.filter(t => t.scanned).length;
+  $("sTot").textContent = tickets.length; $("sOk").textContent = ok; $("sPen").textContent = tickets.length - ok;
+  const body = $("rows"); body.innerHTML = "";
+  tickets.filter(t => !q || t.code.toLowerCase().includes(q)).slice(0, 500).forEach(t => {
+    const tr = body.insertRow();
+    tr.insertCell().textContent = t.code;
+    const s = tr.insertCell(); s.innerHTML = `<span class="tag ${t.scanned ? "t-used" : "t-wait"}">${t.scanned ? "Escanejat" : "Pendent"}</span>`;
+    tr.insertCell().textContent = fmt(toDate(t.scannedAt));
+    const act = tr.insertCell();
+    act.innerHTML = `<button class="rowbtn" data-act="ren" data-code="${t.code}">Reanomena</button>` +
+      (t.scanned ? `<button class="rowbtn" data-act="undo" data-code="${t.code}">Desfés</button>` : "") +
+      `<button class="rowbtn" data-act="del" data-code="${t.code}">Elimina</button>`;
+  });
+}
+$("filter").oninput = renderList;
+
+/* ---------- Editar / eliminar / desfer / afegir individual ---------- */
+$("rows").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const code = b.dataset.code, act = b.dataset.act;
+  try {
+    if (act === "del") {
+      if (!confirm(`Eliminar el codi ${code}? Aquesta acció no es pot desfer.`)) return;
+      await deleteDoc(doc(db, "tickets", encodeURIComponent(code)));
+    } else if (act === "undo") {
+      if (!confirm(`Desfer l'escaneig de ${code}? Tornarà a quedar pendent.`)) return;
+      await updateDoc(doc(db, "tickets", encodeURIComponent(code)), {scanned: false, scannedAt: null, scannedBy: null});
+    } else if (act === "ren") {
+      const nou = prompt("Nou codi:", code);
+      if (!nou || !nou.trim() || nou.trim() === code) return;
+      const nouCode = nou.trim();
+      const destRef = doc(db, "tickets", encodeURIComponent(nouCode));
+      if ((await getDoc(destRef)).exists()) { alert("Ja existeix un tiquet amb aquest codi."); return; }
+      const t = tickets.find(x => x.code === code);
+      await setDoc(destRef, {...t, code: nouCode});
+      await deleteDoc(doc(db, "tickets", encodeURIComponent(code)));
+    }
+  } catch (e) { alert("Error: " + e.message); }
+});
+$("addBtn").onclick = async () => {
+  const code = $("addCode").value.trim();
+  if (!code) return;
+  const ref = doc(db, "tickets", encodeURIComponent(code));
+  if ((await getDoc(ref)).exists()) { alert("Aquest codi ja existeix."); return; }
+  await setDoc(ref, {code, scanned: false, scannedAt: null, createdAt: serverTimestamp()});
+  $("addCode").value = "";
+};
+$("addCode").addEventListener("keydown", e => { if (e.key === "Enter") $("addBtn").click(); });
+function listen() {
+  unsubs.push(onSnapshot(collection(db, "tickets"), snap => {
+    tickets = snap.docs.map(d => d.data()).sort((a, b) => a.code.localeCompare(b.code)); renderList();
+  }));
+  unsubs.push(onSnapshot(query(collection(db, "scans"), orderBy("at", "desc"), limit(15)), snap => {
+    const body = $("recent"); body.innerHTML = "";
+    const names = {ok: ["Vàlid", "t-ok"], used: ["Ja escanejat", "t-used"], bad: ["No existeix", "t-bad"]};
+    snap.docs.forEach(d => {
+      const x = d.data(), tr = body.insertRow(), n = names[x.result] || ["?", "t-wait"];
+      tr.insertCell().textContent = x.code;
+      tr.insertCell().innerHTML = `<span class="tag ${n[1]}">${n[0]}</span>`;
+      tr.insertCell().textContent = fmt(toDate(x.at));
+    });
+  }));
+}
+</script>
+</body>
+</html>

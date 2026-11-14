@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Control d'entrades</title>
 <style>
-:root{--bg:#0f1114;--card:#191c21;--line:#2a2f36;--tx:#eceff3;--mut:#8a93a1;--ok:#17b26a;--err:#e5484d;--warn:#f0a020;--acc:#8ab4ff}
+:root{--bg:#0f1114;--card:#191c21;--line:#2a2f36;--tx:#eceff3;--mut:#8a93a1;--ok:#17b26a;--err:#e5484d;--warn:#f0a020;--acc:#8ab4ff;--wait:#3b7cf0}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
 header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
@@ -41,6 +41,19 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
 #login{max-width:340px;margin:12vh auto;padding:16px}
 #login input{margin:6px 0}
 .err{color:#ff8a8e;font-size:14px;min-height:20px}
+select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;cursor:pointer;width:auto;max-width:260px;margin-bottom:16px;display:block}
+#resS{margin:16px 0;border-radius:14px;padding:24px 16px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px}
+#resS b{display:block;font-size:clamp(22px,6vw,32px);line-height:1.2}
+#resS span{display:block;margin-top:6px;font-size:17px;word-break:break-all}
+.sizesGrid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:14px 0}
+.sizeChip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:8px 14px;min-width:64px}
+.sizeChip b{display:block;font-size:15px;font-weight:600;opacity:.9}
+.sizeChip span{display:block;margin-top:2px;font-size:28px;font-weight:800;line-height:1}
+#resS.wait{background:var(--wait);border-color:var(--wait);color:#eef4ff}
+#resS.used{background:var(--err);border-color:var(--err);color:#fff}
+#resS.bad{background:var(--warn);border-color:var(--warn);color:#2b1a00}
+.sizesTot{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.sizesTot span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
 </style>
 </head>
 <body>
@@ -59,6 +72,12 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
 <div id="app" class="hide">
 <header><h1>Control d'entrades</h1><button id="out">Sortir</button></header>
 <main>
+  <select id="modeSel">
+    <option value="entrades">🎫 Entrades</option>
+    <option value="samarretes">👕 Samarretes</option>
+  </select>
+
+  <div id="mode-entrades">
   <nav>
     <button data-t="scan" class="on">Escanejar</button>
     <button data-t="imp">Importar</button>
@@ -100,10 +119,51 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
     <input id="filter" placeholder="Cercar codi...">
     <table><thead><tr><th>Codi</th><th>Estat</th><th>Hora d'escaneig</th><th>Accions</th></tr></thead><tbody id="rows"></tbody></table>
   </section>
+  </div>
+
+  <div id="mode-samarretes" class="hide">
+  <nav>
+    <button data-t="scanS" class="on">Escanejar</button>
+    <button data-t="impS">Importar Excel</button>
+    <button data-t="listS">Llistat</button>
+  </nav>
+
+  <section id="t-scanS">
+    <p class="muted">Lector físic: deixa el cursor al camp i escaneja. Mòbil: activa la càmera.</p>
+    <input id="manualS" placeholder="Codi de barres o QR (lector físic o escriure a mà + Enter)" autocomplete="off" inputmode="text">
+    <div class="row">
+      <button id="camBtnS" class="main">Activar càmera</button>
+    </div>
+    <div id="readerS"></div>
+    <div id="resS" aria-live="assertive"><b>—</b><span>Esperant un escaneig</span></div>
+  </section>
+
+  <section id="t-impS" class="hide">
+    <p>Puja l'Excel (.xlsx) amb les columnes: codi, nom, i a continuació una columna per talla (1/2, 3/4, 5/6, 7/8, 9/10, 11/12, S, M, L, XL, 2XL, 3XL) amb la quantitat de cada una.</p>
+    <div class="row">
+      <input type="file" id="fileS" accept=".xlsx,.xls">
+    </div>
+    <p id="impSMsg" class="muted"></p>
+    <button id="impSBtn" class="main hide">Importar a Firebase</button>
+  </section>
+
+  <section id="t-listS" class="hide">
+    <div class="stats">
+      <div><strong id="sTotS">0</strong><span class="muted">Comandes</span></div>
+      <div><strong id="sOkS">0</strong><span class="muted">Recollides</span></div>
+      <div><strong id="sPenS">0</strong><span class="muted">Pendents</span></div>
+    </div>
+    <div class="muted">Total per talla (pendents de recollir):</div>
+    <div class="sizesTot" id="sizesTotal"></div>
+    <input id="filterS" placeholder="Cercar per codi o nom...">
+    <table><thead><tr><th>Codi</th><th>Nom</th><th>Talles</th><th>Estat</th><th>Hora recollida</th><th>Accions</th></tr></thead><tbody id="rowsS"></tbody></table>
+  </section>
+  </div>
 </main>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -133,7 +193,7 @@ onAuthStateChanged(auth, user => {
   $("login").classList.toggle("hide", !!user);
   $("app").classList.toggle("hide", !user);
   unsubs.forEach(u => u()); unsubs = [];
-  if (user) { listen(); $("manual").focus(); } else stopCam();
+  if (user) { listen(); listenShirts(); $("manual").focus(); } else { stopCam(); stopCamS(); }
 });
 $("lf").onsubmit = async e => {
   e.preventDefault(); $("lerr").textContent = "";
@@ -143,11 +203,22 @@ $("lf").onsubmit = async e => {
 $("out").onclick = () => signOut(auth);
 
 /* ---------- Pestanyes ---------- */
+const ALL_TABS = ["scan","imp","list","scanS","impS","listS"];
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
-  document.querySelectorAll("nav button").forEach(x => x.classList.toggle("on", x === b));
-  ["scan","imp","list"].forEach(t => $("t-"+t).classList.toggle("hide", t !== b.dataset.t));
+  b.closest("nav").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+  ALL_TABS.forEach(t => { const el = $("t-"+t); if (el) el.classList.toggle("hide", t !== b.dataset.t); });
   if (b.dataset.t !== "scan") stopCam(); else $("manual").focus();
+  if (b.dataset.t !== "scanS") stopCamS(); else $("manualS").focus();
 });
+
+/* ---------- Mode: Entrades / Samarretes ---------- */
+$("modeSel").onchange = () => {
+  const m = $("modeSel").value;
+  $("mode-entrades").classList.toggle("hide", m !== "entrades");
+  $("mode-samarretes").classList.toggle("hide", m !== "samarretes");
+  stopCam(); stopCamS();
+  if (m === "entrades") $("manual").focus(); else $("manualS").focus();
+};
 
 /* ---------- Validació (transacció: evita dobles entrades) ---------- */
 function beep(freq, ms) {
@@ -302,6 +373,176 @@ function listen() {
       tr.insertCell().innerHTML = `<span class="tag ${n[1]}">${n[0]}</span>`;
       tr.insertCell().textContent = fmt(toDate(x.at));
     });
+  }));
+}
+
+/* ================= SAMARRETES ================= */
+const SIZES = ["1/2","3/4","5/6","7/8","9/10","11/12","S","M","L","XL","2XL","3XL"];
+function sizesLine(sizes) {
+  if (!sizes) return "";
+  return Object.entries(sizes).filter(([,q]) => q > 0).map(([s,q]) => `${s}×${q}`).join("  ·  ");
+}
+function sizesGridHtml(sizes) {
+  const entries = Object.entries(sizes || {}).filter(([,q]) => q > 0);
+  if (!entries.length) return "";
+  return `<div class="sizesGrid">` + entries.map(([s,q]) => `<div class="sizeChip"><b>${s}</b><span>${q}</span></div>`).join("") + `</div>`;
+}
+function beepS(ok) { ok ? beep(880,150) : beep(200,450); navigator.vibrate && navigator.vibrate(ok ? 80 : [200,100,200]); }
+
+/* --- Escaneig --- */
+let pendingOrderS = null;
+function showS(cls, title, sub, code, sizes, showPendingBtns, showCollectedBtns) {
+  const r = $("resS"); r.className = cls;
+  let html = `<b>${title}</b><span>${sub || ""}</span>`;
+  html += sizesGridHtml(sizes);
+  html += `<span>${code || ""}</span>`;
+  if (showPendingBtns) html += `<div class="row"><button id="finBtn" class="main">Finalitzar recollida</button><button id="cancelSBtn">Cancel·lar</button></div>`;
+  if (showCollectedBtns) html += `<div class="row"><button id="undoSBtn">Desfer recollida</button><button id="closeSBtn">Tancar</button></div>`;
+  r.innerHTML = html;
+  if (showPendingBtns) {
+    $("finBtn").onclick = async () => {
+      if (!pendingOrderS) return;
+      try {
+        await updateDoc(pendingOrderS.ref, {status: "collected", collectedAt: serverTimestamp()});
+        showS("used", "RECOLLIDA FINALITZADA", pendingOrderS.name + " — entregada ara mateix", pendingOrderS.code, pendingOrderS.sizes, false, true);
+      } catch (e) { alert("Error: " + e.message); }
+      pendingOrderS = null;
+    };
+    $("cancelSBtn").onclick = () => { pendingOrderS = null; resetS(); };
+  }
+  if (showCollectedBtns) {
+    $("undoSBtn").onclick = async () => {
+      if (!confirm("Desfer la recollida d'aquesta comanda? Tornarà a quedar pendent.")) return;
+      await updateDoc(doc(db, "shirt_orders", encodeURIComponent(code)), {status: "pending", collectedAt: null});
+      resetS();
+    };
+    $("closeSBtn").onclick = resetS;
+  }
+}
+function resetS() { const r = $("resS"); r.className = ""; r.innerHTML = "<b>—</b><span>Esperant un escaneig</span>"; }
+async function validateShirt(raw, source) {
+  const code = String(raw).trim();
+  if (!code || pendingOrderS) return;
+  const ref = doc(db, "shirt_orders", encodeURIComponent(code));
+  let snap;
+  try { snap = await getDoc(ref); }
+  catch { showS("bad", "ERROR DE XARXA", "No s'ha pogut consultar. Torna-ho a provar.", code); beepS(false); return; }
+  if (!snap.exists()) { showS("bad", "NO EXISTEIX", "Aquest codi no correspon a cap comanda", code); beepS(false); return; }
+  const d = snap.data();
+  if (d.status === "collected") {
+    showS("used", "JA RECOLLIDA", d.name + " — recollida el " + fmt(toDate(d.collectedAt)), code, d.sizes, false, true);
+    beepS(false);
+  } else {
+    pendingOrderS = {code, ref, name: d.name, sizes: d.sizes};
+    showS("wait", "COMANDA PENDENT — " + d.name, "Entrega-li:", code, d.sizes, true, false);
+    beepS(true);
+  }
+}
+$("manualS").addEventListener("keydown", e => {
+  if (e.key === "Enter") { const v = e.target.value; e.target.value = ""; validateShirt(v, "lector"); }
+});
+$("t-scanS").addEventListener("click", e => { if (!["BUTTON","INPUT"].includes(e.target.tagName) && !camS) $("manualS").focus(); });
+
+/* --- Càmera (samarretes) --- */
+let camS = null, lastS = "", lastTS = 0;
+async function startCamS() {
+  const F = Html5QrcodeSupportedFormats;
+  camS = new Html5Qrcode("readerS", {
+    formatsToSupport: [F.CODE_128, F.CODE_39, F.EAN_13, F.EAN_8, F.UPC_A, F.ITF, F.QR_CODE],
+    useBarCodeDetectorIfSupported: true, verbose: false
+  });
+  try {
+    await camS.start({facingMode: "environment"}, {fps: 10, qrbox: {width: 280, height: 140}}, txt => {
+      if (txt === lastS && Date.now() - lastTS < 3000) return;
+      lastS = txt; lastTS = Date.now(); validateShirt(txt, "mòbil");
+    }, () => {});
+    $("camBtnS").textContent = "Aturar càmera";
+  } catch { camS = null; showS("bad", "CÀMERA NO DISPONIBLE", "Permet l'accés a la càmera al navegador.", ""); }
+}
+async function stopCamS() {
+  if (camS) { try { await camS.stop(); camS.clear(); } catch {} camS = null; }
+  $("camBtnS").textContent = "Activar càmera";
+}
+$("camBtnS").onclick = () => camS ? stopCamS() : startCamS();
+
+/* --- Importar Excel --- */
+let pendingImportS = null;
+$("fileS").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  $("impSMsg").textContent = "Llegint l'Excel...";
+  try {
+    const buf = await f.arrayBuffer();
+    const wb = XLSX.read(buf, {type: "array"});
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, raw: true, defval: ""});
+    const start = (rows.length && isNaN(parseInt(rows[0][2], 10))) ? 1 : 0;
+    const orders = [];
+    for (let i = start; i < rows.length; i++) {
+      const r = rows[i]; if (!r || !r[0]) continue;
+      const code = String(r[0]).trim(), name = String(r[1] || "").trim();
+      const sizes = {};
+      SIZES.forEach((sz, idx) => { const v = parseInt(r[2 + idx], 10); if (v > 0) sizes[sz] = v; });
+      orders.push({code, name, sizes});
+    }
+    pendingImportS = orders;
+    $("impSMsg").textContent = `${orders.length} comandes llegides. Fes clic a "Importar a Firebase" per desar-les.`;
+    $("impSBtn").classList.remove("hide");
+  } catch (e) { $("impSMsg").textContent = "Error llegint l'Excel: " + e.message; }
+};
+$("impSBtn").onclick = async () => {
+  if (!pendingImportS || !pendingImportS.length) return;
+  $("impSBtn").disabled = true; $("impSMsg").textContent = "Important...";
+  try {
+    const existing = new Set((await getDocs(collection(db, "shirt_orders"))).docs.map(d => d.id));
+    for (let i = 0; i < pendingImportS.length; i += 400) {
+      const b = writeBatch(db);
+      pendingImportS.slice(i, i + 400).forEach(o => {
+        const id = encodeURIComponent(o.code), ref = doc(db, "shirt_orders", id);
+        if (existing.has(id)) b.set(ref, {code: o.code, name: o.name, sizes: o.sizes}, {merge: true});
+        else b.set(ref, {code: o.code, name: o.name, sizes: o.sizes, status: "pending", collectedAt: null, createdAt: serverTimestamp()});
+      });
+      await b.commit();
+    }
+    $("impSMsg").textContent = `Importades/actualitzades ${pendingImportS.length} comandes.`;
+    pendingImportS = null; $("impSBtn").classList.add("hide"); $("fileS").value = "";
+  } catch (e) { $("impSMsg").textContent = "Error important: " + e.message; }
+  $("impSBtn").disabled = false;
+};
+
+/* --- Llistat (samarretes) --- */
+let shirtOrders = [];
+function renderListS() {
+  const q = $("filterS").value.trim().toLowerCase();
+  const done = shirtOrders.filter(o => o.status === "collected").length;
+  $("sTotS").textContent = shirtOrders.length; $("sOkS").textContent = done; $("sPenS").textContent = shirtOrders.length - done;
+  const totals = {};
+  shirtOrders.filter(o => o.status !== "collected").forEach(o => Object.entries(o.sizes || {}).forEach(([s,v]) => totals[s] = (totals[s]||0) + v));
+  $("sizesTotal").innerHTML = SIZES.filter(s => totals[s]).map(s => `<span>${s}: ${totals[s]}</span>`).join("") || `<span class="muted">—</span>`;
+  const body = $("rowsS"); body.innerHTML = "";
+  shirtOrders.filter(o => !q || o.code.toLowerCase().includes(q) || (o.name||"").toLowerCase().includes(q)).slice(0, 500).forEach(o => {
+    const tr = body.insertRow();
+    tr.insertCell().textContent = o.code;
+    tr.insertCell().textContent = o.name || "";
+    tr.insertCell().textContent = sizesLine(o.sizes);
+    const s = tr.insertCell(); s.innerHTML = `<span class="tag ${o.status === "collected" ? "t-used" : "t-wait"}">${o.status === "collected" ? "Recollida" : "Pendent"}</span>`;
+    tr.insertCell().textContent = fmt(toDate(o.collectedAt));
+    const act = tr.insertCell();
+    act.innerHTML = `<button class="rowbtn" data-act="${o.status === "collected" ? "undo" : "done"}" data-code="${o.code}">${o.status === "collected" ? "Desfer" : "Marca recollida"}</button>` +
+      `<button class="rowbtn" data-act="delS" data-code="${o.code}">Elimina</button>`;
+  });
+}
+$("filterS").oninput = renderListS;
+$("rowsS").addEventListener("click", async e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const code = b.dataset.code, act = b.dataset.act, ref = doc(db, "shirt_orders", encodeURIComponent(code));
+  try {
+    if (act === "delS") { if (confirm(`Eliminar la comanda de ${code}?`)) await deleteDoc(ref); }
+    else if (act === "done") await updateDoc(ref, {status: "collected", collectedAt: serverTimestamp()});
+    else if (act === "undo") await updateDoc(ref, {status: "pending", collectedAt: null});
+  } catch (e) { alert("Error: " + e.message); }
+});
+function listenShirts() {
+  unsubs.push(onSnapshot(collection(db, "shirt_orders"), snap => {
+    shirtOrders = snap.docs.map(d => d.data()).sort((a,b) => a.code.localeCompare(b.code)); renderListS();
   }));
 }
 </script>

@@ -23,7 +23,8 @@ textarea{min-height:180px;font-family:ui-monospace,monospace}
 .hide{display:none!important}
 .row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
 .muted{color:var(--mut);font-size:14px}
-#reader{width:100%;max-width:420px;margin:10px auto;border-radius:10px;overflow:hidden}
+#reader,#readerS{width:100%;max-width:300px;aspect-ratio:1/1;margin:10px auto;border-radius:16px;overflow:hidden;position:relative;background:#000}
+#reader video,#readerS video{width:100%!important;height:100%!important;object-fit:cover}
 #res{margin:16px 0;border-radius:14px;padding:28px 16px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px}
 #res b{display:block;font-size:clamp(34px,10vw,56px);letter-spacing:.5px;line-height:1.1}
 #res span{display:block;margin-top:8px;font-size:18px;word-break:break-all}
@@ -287,13 +288,12 @@ $("t-scan").addEventListener("click", e => { if (!["BUTTON","INPUT"].includes(e.
 /* ---------- Càmera del mòbil ---------- */
 let cam = null, last = "", lastT = 0;
 async function startCam() {
-  const F = Html5QrcodeSupportedFormats;
   cam = new Html5Qrcode("reader", {
-    formatsToSupport: [F.CODE_128, F.CODE_39, F.EAN_13, F.EAN_8, F.UPC_A, F.ITF, F.QR_CODE],
+    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
     useBarCodeDetectorIfSupported: true, verbose: false
   });
   try {
-    await cam.start({facingMode: "environment"}, {fps: 10, qrbox: {width: 280, height: 140}}, txt => {
+    await cam.start({facingMode: "environment"}, {fps: 10, qrbox: {width: 230, height: 230}, aspectRatio: 1}, txt => {
       if (txt === last && Date.now() - lastT < 3000) return; // evita lectures repetides
       last = txt; lastT = Date.now(); validate(txt, "mòbil");
     }, () => {});
@@ -488,13 +488,12 @@ $("t-scanS").addEventListener("click", e => { if (!["BUTTON","INPUT"].includes(e
 /* --- Càmera (samarretes) --- */
 let camS = null, lastS = "", lastTS = 0;
 async function startCamS() {
-  const F = Html5QrcodeSupportedFormats;
   camS = new Html5Qrcode("readerS", {
-    formatsToSupport: [F.CODE_128, F.CODE_39, F.EAN_13, F.EAN_8, F.UPC_A, F.ITF, F.QR_CODE],
+    formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
     useBarCodeDetectorIfSupported: true, verbose: false
   });
   try {
-    await camS.start({facingMode: "environment"}, {fps: 10, qrbox: {width: 280, height: 140}}, txt => {
+    await camS.start({facingMode: "environment"}, {fps: 10, qrbox: {width: 230, height: 230}, aspectRatio: 1}, txt => {
       if (txt === lastS && Date.now() - lastTS < 3000) return;
       lastS = txt; lastTS = Date.now(); validateShirt(txt, "mòbil");
     }, () => {});

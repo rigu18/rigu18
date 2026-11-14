@@ -153,6 +153,9 @@ select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--
       <div><strong id="sOkS">0</strong><span class="muted">Recollides</span></div>
       <div><strong id="sPenS">0</strong><span class="muted">Pendents</span></div>
     </div>
+    <div class="row">
+      <button id="exportPendBtn">⬇️ Exportar pendents a Excel</button>
+    </div>
     <div class="muted">Total per talla (pendents de recollir):</div>
     <div class="sizesTot" id="sizesTotal"></div>
     <input id="filterS" placeholder="Cercar per codi o nom...">
@@ -540,6 +543,20 @@ $("rowsS").addEventListener("click", async e => {
     else if (act === "undo") await updateDoc(ref, {status: "pending", collectedAt: null});
   } catch (e) { alert("Error: " + e.message); }
 });
+/* --- Exportar pendents a Excel --- */
+$("exportPendBtn").onclick = () => {
+  const pend = shirtOrders.filter(o => o.status !== "collected");
+  if (!pend.length) { alert("No hi ha cap comanda pendent de recollir."); return; }
+  const header = ["Codi", "Nom", ...SIZES];
+  const rows = pend.map(o => [o.code, o.name || "", ...SIZES.map(s => (o.sizes && o.sizes[s]) || "")]);
+  const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+  ws["!cols"] = header.map(() => ({wch: 10}));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Pendents");
+  const data = new Date().toISOString().slice(0, 10);
+  XLSX.writeFile(wb, `samarretes_pendents_${data}.xlsx`);
+};
+
 function listenShirts() {
   unsubs.push(onSnapshot(collection(db, "shirt_orders"), snap => {
     shirtOrders = snap.docs.map(d => d.data()).sort((a,b) => a.code.localeCompare(b.code)); renderListS();

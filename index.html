@@ -118,6 +118,15 @@ select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--
     </div>
     <input id="filter" placeholder="Cercar codi...">
     <table><thead><tr><th>Codi</th><th>Estat</th><th>Hora d'escaneig</th><th>Accions</th></tr></thead><tbody id="rows"></tbody></table>
+
+    <div class="row" style="margin-top:28px">
+      <button id="dangerToggle" style="opacity:.55">⚠️ Zona perillosa</button>
+    </div>
+    <div id="dangerZone" class="hide" style="border:1px dashed var(--err);border-radius:10px;padding:12px;margin-top:8px">
+      <p class="muted">Això eliminarà <b>TOTS</b> els tiquets i l'historial d'escanejos d'Entrades. Només afecta Entrades, no Samarretes. No es pot desfer.</p>
+      <input id="dangerConfirm" placeholder='Escriu ESBORRA ENTRADES per confirmar'>
+      <div class="row"><button id="dangerBtn" disabled>Elimina tots els tiquets d'Entrades</button></div>
+    </div>
   </section>
   </div>
 
@@ -160,6 +169,15 @@ select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--
     <div class="sizesTot" id="sizesTotal"></div>
     <input id="filterS" placeholder="Cercar per codi o nom...">
     <table><thead><tr><th>Codi</th><th>Nom</th><th>Talles</th><th>Estat</th><th>Hora recollida</th><th>Accions</th></tr></thead><tbody id="rowsS"></tbody></table>
+
+    <div class="row" style="margin-top:28px">
+      <button id="dangerToggleS" style="opacity:.55">⚠️ Zona perillosa</button>
+    </div>
+    <div id="dangerZoneS" class="hide" style="border:1px dashed var(--err);border-radius:10px;padding:12px;margin-top:8px">
+      <p class="muted">Això eliminarà <b>TOTES</b> les comandes de Samarretes. Només afecta Samarretes, no Entrades. No es pot desfer.</p>
+      <input id="dangerConfirmS" placeholder='Escriu ESBORRA SAMARRETES per confirmar'>
+      <div class="row"><button id="dangerBtnS" disabled>Elimina totes les comandes de Samarretes</button></div>
+    </div>
   </section>
   </div>
 </main>
@@ -363,6 +381,27 @@ $("addBtn").onclick = async () => {
   $("addCode").value = "";
 };
 $("addCode").addEventListener("keydown", e => { if (e.key === "Enter") $("addBtn").click(); });
+/* ---------- Zona perillosa: eliminar tots els registres (Entrades) ---------- */
+$("dangerToggle").onclick = () => $("dangerZone").classList.toggle("hide");
+$("dangerConfirm").oninput = () => { $("dangerBtn").disabled = $("dangerConfirm").value.trim() !== "ESBORRA ENTRADES"; };
+$("dangerBtn").onclick = async () => {
+  if (!confirm("Confirmes eliminar TOTS els tiquets i l'historial d'escanejos d'Entrades? Aquesta acció no es pot desfer.")) return;
+  $("dangerBtn").disabled = true; $("dangerBtn").textContent = "Eliminant...";
+  try {
+    for (const coll of ["tickets", "scans"]) {
+      const docs = (await getDocs(collection(db, coll))).docs;
+      for (let i = 0; i < docs.length; i += 400) {
+        const b = writeBatch(db);
+        docs.slice(i, i + 400).forEach(d => b.delete(d.ref));
+        await b.commit();
+      }
+    }
+    alert("S'han eliminat tots els registres d'Entrades.");
+  } catch (e) { alert("Error: " + e.message); }
+  $("dangerConfirm").value = ""; $("dangerBtn").textContent = "Elimina tots els tiquets d'Entrades";
+  $("dangerZone").classList.add("hide");
+};
+
 function listen() {
   unsubs.push(onSnapshot(collection(db, "tickets"), snap => {
     tickets = snap.docs.map(d => d.data()).sort((a, b) => a.code.localeCompare(b.code)); renderList();
@@ -555,6 +594,25 @@ $("exportPendBtn").onclick = () => {
   XLSX.utils.book_append_sheet(wb, ws, "Pendents");
   const data = new Date().toISOString().slice(0, 10);
   XLSX.writeFile(wb, `samarretes_pendents_${data}.xlsx`);
+};
+
+/* ---------- Zona perillosa: eliminar tots els registres (Samarretes) ---------- */
+$("dangerToggleS").onclick = () => $("dangerZoneS").classList.toggle("hide");
+$("dangerConfirmS").oninput = () => { $("dangerBtnS").disabled = $("dangerConfirmS").value.trim() !== "ESBORRA SAMARRETES"; };
+$("dangerBtnS").onclick = async () => {
+  if (!confirm("Confirmes eliminar TOTES les comandes de Samarretes? Aquesta acció no es pot desfer.")) return;
+  $("dangerBtnS").disabled = true; $("dangerBtnS").textContent = "Eliminant...";
+  try {
+    const docs = (await getDocs(collection(db, "shirt_orders"))).docs;
+    for (let i = 0; i < docs.length; i += 400) {
+      const b = writeBatch(db);
+      docs.slice(i, i + 400).forEach(d => b.delete(d.ref));
+      await b.commit();
+    }
+    alert("S'han eliminat totes les comandes de Samarretes.");
+  } catch (e) { alert("Error: " + e.message); }
+  $("dangerConfirmS").value = ""; $("dangerBtnS").textContent = "Elimina totes les comandes de Samarretes";
+  $("dangerZoneS").classList.add("hide");
 };
 
 function listenShirts() {

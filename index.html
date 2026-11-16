@@ -42,14 +42,27 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
 #login{max-width:340px;margin:12vh auto;padding:16px}
 #login input{margin:6px 0}
 .err{color:#ff8a8e;font-size:14px;min-height:20px}
-select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;cursor:pointer;width:auto;max-width:260px;margin-bottom:16px;display:block}
+#loading{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
+.spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#fatalErr{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
+#hamburger{background:none;border:none;font-size:22px;line-height:1;padding:6px 8px;cursor:pointer}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;display:none}
+#overlay.show{display:block}
+#drawer{position:fixed;top:0;left:0;height:100%;width:260px;max-width:80vw;background:var(--card);border-right:1px solid var(--line);z-index:50;transform:translateX(-100%);transition:transform .22s ease;display:flex;flex-direction:column;padding:18px 14px;overflow-y:auto}
+#drawer.open{transform:translateX(0)}
+#drawer h2{font-size:14px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin:0 0 14px}
+.navlink{width:100%;text-align:left;margin-bottom:8px;background:transparent;font-size:15px}
+.navlink.on{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
 #resS{margin:16px 0;border-radius:14px;padding:24px 16px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px}
 #resS b{display:block;font-size:clamp(22px,6vw,32px);line-height:1.2}
 #resS span{display:block;margin-top:6px;font-size:17px;word-break:break-all}
-.sizesGrid{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:14px 0}
-.sizeChip{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:8px 14px;min-width:64px}
-.sizeChip b{display:block;font-size:15px;font-weight:600;opacity:.9}
-.sizeChip span{display:block;margin-top:2px;font-size:28px;font-weight:800;line-height:1}
+.sizesTable{width:100%;max-width:320px;margin:14px auto 0;border-collapse:collapse;background:rgba(255,255,255,.14);border-radius:10px;overflow:hidden}
+.sizesTable th{font-size:12px;text-transform:uppercase;letter-spacing:.6px;opacity:.85;font-weight:700;padding:7px 14px;border-bottom:2px solid rgba(255,255,255,.35);text-align:left}
+.sizesTable th:last-child,.sizesTable td:last-child{text-align:right}
+.sizesTable td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.18);font-size:19px;font-weight:600}
+.sizesTable td:last-child{font-size:26px;font-weight:800}
+.sizesTable tr:last-child td{border-bottom:none}
 #resS.wait{background:var(--wait);border-color:var(--wait);color:#eef4ff}
 #resS.used{background:var(--err);border-color:var(--err);color:#fff}
 #resS.bad{background:var(--warn);border-color:var(--warn);color:#2b1a00}
@@ -58,6 +71,11 @@ select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--
 </style>
 </head>
 <body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p class="muted" id="loadingMsg">Carregant...</p>
+</div>
 
 <section id="login" class="hide">
   <h1>Control d'entrades</h1>
@@ -71,20 +89,25 @@ select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--
 </section>
 
 <div id="app" class="hide">
-<header><h1>Control d'entrades</h1><button id="out">Sortir</button></header>
+<header>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button id="hamburger" aria-label="Menú">☰</button>
+    <h1>Control d'entrades</h1>
+  </div>
+  <button id="out">Sortir</button>
+</header>
+
+<div id="overlay"></div>
+<div id="drawer">
+  <h2>Menú</h2>
+  <button class="navlink on" data-v="scan">🎫 Escanejar Entrades</button>
+  <button class="navlink" data-v="list">📋 Llistat Entrades</button>
+  <button class="navlink" data-v="scanS">👕 Escanejar Samarretes</button>
+  <button class="navlink" data-v="listS">📋 Llistat Samarretes</button>
+  <button class="navlink" data-v="gestio">⚙️ Gestionar dades</button>
+</div>
+
 <main>
-  <select id="modeSel">
-    <option value="entrades">🎫 Entrades</option>
-    <option value="samarretes">👕 Samarretes</option>
-  </select>
-
-  <div id="mode-entrades">
-  <nav>
-    <button data-t="scan" class="on">Escanejar</button>
-    <button data-t="imp">Importar</button>
-    <button data-t="list">Llistat</button>
-  </nav>
-
   <section id="t-scan">
     <p class="muted">Lector físic: deixa el cursor al camp i escaneja. Mòbil: activa la càmera.</p>
     <input id="manual" placeholder="Codi de barres (lector físic o escriure a mà + Enter)" autocomplete="off" inputmode="text">
@@ -97,48 +120,17 @@ select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--
     <table><tbody id="recent"></tbody></table>
   </section>
 
-  <section id="t-imp" class="hide">
-    <p>Enganxa els codis (un per línia, o separats per comes) o puja un fitxer .csv / .txt <b>sense capçalera</b>.</p>
-    <textarea id="codes" placeholder="8412345678901&#10;8412345678902&#10;..."></textarea>
-    <div class="row">
-      <input type="file" id="file" accept=".csv,.txt" style="width:auto">
-      <button id="impBtn" class="main">Importar codis</button>
-    </div>
-    <p id="impMsg" class="muted"></p>
-  </section>
-
   <section id="t-list" class="hide">
     <div class="stats">
       <div><strong id="sTot">0</strong><span class="muted">Total</span></div>
       <div><strong id="sOk">0</strong><span class="muted">Entrats</span></div>
       <div><strong id="sPen">0</strong><span class="muted">Pendents</span></div>
     </div>
-    <div class="row">
-      <input id="addCode" placeholder="Afegir un codi nou...">
-      <button id="addBtn">Afegir</button>
-    </div>
     <input id="filter" placeholder="Cercar codi...">
     <table><thead><tr><th>Codi</th><th>Estat</th><th>Hora d'escaneig</th><th>Accions</th></tr></thead><tbody id="rows"></tbody></table>
-
-    <div class="row" style="margin-top:28px">
-      <button id="dangerToggle" style="opacity:.55">⚠️ Zona perillosa</button>
-    </div>
-    <div id="dangerZone" class="hide" style="border:1px dashed var(--err);border-radius:10px;padding:12px;margin-top:8px">
-      <p class="muted">Això eliminarà <b>TOTS</b> els tiquets i l'historial d'escanejos d'Entrades. Només afecta Entrades, no Samarretes. No es pot desfer.</p>
-      <input id="dangerConfirm" placeholder='Escriu ESBORRA ENTRADES per confirmar'>
-      <div class="row"><button id="dangerBtn" disabled>Elimina tots els tiquets d'Entrades</button></div>
-    </div>
   </section>
-  </div>
 
-  <div id="mode-samarretes" class="hide">
-  <nav>
-    <button data-t="scanS" class="on">Escanejar</button>
-    <button data-t="impS">Importar Excel</button>
-    <button data-t="listS">Llistat</button>
-  </nav>
-
-  <section id="t-scanS">
+  <section id="t-scanS" class="hide">
     <p class="muted">Lector físic: deixa el cursor al camp i escaneja. Mòbil: activa la càmera.</p>
     <input id="manualS" placeholder="Codi de barres o QR (lector físic o escriure a mà + Enter)" autocomplete="off" inputmode="text">
     <div class="row">
@@ -146,15 +138,6 @@ select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--
     </div>
     <div id="readerS"></div>
     <div id="resS" aria-live="assertive"><b>—</b><span>Esperant un escaneig</span></div>
-  </section>
-
-  <section id="t-impS" class="hide">
-    <p>Puja l'Excel (.xlsx) amb les columnes: codi, nom, i a continuació una columna per talla (1/2, 3/4, 5/6, 7/8, 9/10, 11/12, S, M, L, XL, 2XL, 3XL) amb la quantitat de cada una.</p>
-    <div class="row">
-      <input type="file" id="fileS" accept=".xlsx,.xls">
-    </div>
-    <p id="impSMsg" class="muted"></p>
-    <button id="impSBtn" class="main hide">Importar a Firebase</button>
   </section>
 
   <section id="t-listS" class="hide">
@@ -170,11 +153,49 @@ select{font:inherit;color:inherit;background:var(--card);border:1px solid var(--
     <div class="sizesTot" id="sizesTotal"></div>
     <input id="filterS" placeholder="Cercar per codi o nom...">
     <table><thead><tr><th>Codi</th><th>Nom</th><th>Talles</th><th>Estat</th><th>Hora recollida</th><th>Accions</th></tr></thead><tbody id="rowsS"></tbody></table>
+  </section>
 
-    <div class="row" style="margin-top:28px">
-      <button id="dangerToggleS" style="opacity:.55">⚠️ Zona perillosa</button>
+  <div id="mode-gestio" class="hide">
+  <nav>
+    <button data-t="gestE" class="on">Entrades</button>
+    <button data-t="gestS">Samarretes</button>
+  </nav>
+
+  <section id="t-gestE">
+    <h3>Importar codis</h3>
+    <p>Enganxa els codis (un per línia, o separats per comes) o puja un fitxer .csv / .txt <b>sense capçalera</b>.</p>
+    <textarea id="codes" placeholder="8412345678901&#10;8412345678902&#10;..."></textarea>
+    <div class="row">
+      <input type="file" id="file" accept=".csv,.txt" style="width:auto">
+      <button id="impBtn" class="main">Importar codis</button>
     </div>
-    <div id="dangerZoneS" class="hide" style="border:1px dashed var(--err);border-radius:10px;padding:12px;margin-top:8px">
+    <p id="impMsg" class="muted"></p>
+
+    <h3>Afegir un codi individual</h3>
+    <div class="row">
+      <input id="addCode" placeholder="Afegir un codi nou...">
+      <button id="addBtn">Afegir</button>
+    </div>
+
+    <h3 style="color:var(--err)">⚠️ Zona perillosa</h3>
+    <div style="border:1px dashed var(--err);border-radius:10px;padding:12px">
+      <p class="muted">Això eliminarà <b>TOTS</b> els tiquets i l'historial d'escanejos d'Entrades. Només afecta Entrades, no Samarretes. No es pot desfer.</p>
+      <input id="dangerConfirm" placeholder='Escriu ESBORRA ENTRADES per confirmar'>
+      <div class="row"><button id="dangerBtn" disabled>Elimina tots els tiquets d'Entrades</button></div>
+    </div>
+  </section>
+
+  <section id="t-gestS" class="hide">
+    <h3>Importar Excel</h3>
+    <p>Puja l'Excel (.xlsx) amb les columnes: codi, nom, i a continuació una columna per talla (1/2, 3/4, 5/6, 7/8, 9/10, 11/12, S, M, L, XL, 2XL, 3XL) amb la quantitat de cada una.</p>
+    <div class="row">
+      <input type="file" id="fileS" accept=".xlsx,.xls">
+    </div>
+    <p id="impSMsg" class="muted"></p>
+    <button id="impSBtn" class="main hide">Importar a Firebase</button>
+
+    <h3 style="color:var(--err)">⚠️ Zona perillosa</h3>
+    <div style="border:1px dashed var(--err);border-radius:10px;padding:12px">
       <p class="muted">Això eliminarà <b>TOTES</b> les comandes de Samarretes. Només afecta Samarretes, no Entrades. No es pot desfer.</p>
       <input id="dangerConfirmS" placeholder='Escriu ESBORRA SAMARRETES per confirmar'>
       <div class="row"><button id="dangerBtnS" disabled>Elimina totes les comandes de Samarretes</button></div>
@@ -202,6 +223,8 @@ const firebaseConfig = {
 };
 // ===============================================================
 
+try {
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -211,11 +234,16 @@ const toDate = t => t && t.toDate ? t.toDate() : (t instanceof Date ? t : null);
 let unsubs = [];
 
 /* ---------- Sessió ---------- */
+let authResolved = false;
+setTimeout(() => { if (!authResolved) $("loadingMsg").textContent = "Triga més del normal... comprova la connexió a internet."; }, 7000);
 onAuthStateChanged(auth, user => {
+  authResolved = true;
+  $("loading").classList.add("hide");
   $("login").classList.toggle("hide", !!user);
   $("app").classList.toggle("hide", !user);
   unsubs.forEach(u => u()); unsubs = [];
   if (user) { listen(); listenShirts(); $("manual").focus(); } else { stopCam(); stopCamS(); }
+  void document.body.offsetHeight; // força un repintat (alguns mòbils es queden en blanc si no)
 });
 $("lf").onsubmit = async e => {
   e.preventDefault(); $("lerr").textContent = "";
@@ -224,23 +252,28 @@ $("lf").onsubmit = async e => {
 };
 $("out").onclick = () => signOut(auth);
 
-/* ---------- Pestanyes ---------- */
-const ALL_TABS = ["scan","imp","list","scanS","impS","listS"];
+/* ---------- Pestanyes internes de "Gestionar dades" ---------- */
 document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
   b.closest("nav").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
-  ALL_TABS.forEach(t => { const el = $("t-"+t); if (el) el.classList.toggle("hide", t !== b.dataset.t); });
-  if (b.dataset.t !== "scan") stopCam(); else $("manual").focus();
-  if (b.dataset.t !== "scanS") stopCamS(); else $("manualS").focus();
+  ["gestE","gestS"].forEach(t => { const el = $("t-"+t); if (el) el.classList.toggle("hide", t !== b.dataset.t); });
 });
 
-/* ---------- Mode: Entrades / Samarretes ---------- */
-$("modeSel").onchange = () => {
-  const m = $("modeSel").value;
-  $("mode-entrades").classList.toggle("hide", m !== "entrades");
-  $("mode-samarretes").classList.toggle("hide", m !== "samarretes");
+/* ---------- Menú lateral (calaix) ---------- */
+function openDrawer() { $("drawer").classList.add("open"); $("overlay").classList.add("show"); }
+function closeDrawer() { $("drawer").classList.remove("open"); $("overlay").classList.remove("show"); }
+$("hamburger").onclick = () => $("drawer").classList.contains("open") ? closeDrawer() : openDrawer();
+$("overlay").onclick = closeDrawer;
+
+const VIEWS = ["scan", "list", "scanS", "listS", "gestio"];
+function showView(v) {
+  VIEWS.forEach(id => { const el = id === "gestio" ? $("mode-gestio") : $("t-" + id); if (el) el.classList.toggle("hide", id !== v); });
+  document.querySelectorAll(".navlink").forEach(b => b.classList.toggle("on", b.dataset.v === v));
   stopCam(); stopCamS();
-  if (m === "entrades") $("manual").focus(); else $("manualS").focus();
-};
+  if (v === "scan") $("manual").focus();
+  else if (v === "scanS") $("manualS").focus();
+  closeDrawer();
+}
+document.querySelectorAll(".navlink").forEach(b => b.onclick = () => showView(b.dataset.v));
 
 /* ---------- Validació (transacció: evita dobles entrades) ---------- */
 function beep(freq, ms) {
@@ -382,7 +415,6 @@ $("addBtn").onclick = async () => {
 };
 $("addCode").addEventListener("keydown", e => { if (e.key === "Enter") $("addBtn").click(); });
 /* ---------- Zona perillosa: eliminar tots els registres (Entrades) ---------- */
-$("dangerToggle").onclick = () => $("dangerZone").classList.toggle("hide");
 $("dangerConfirm").oninput = () => { $("dangerBtn").disabled = $("dangerConfirm").value.trim() !== "ESBORRA ENTRADES"; };
 $("dangerBtn").onclick = async () => {
   if (!confirm("Confirmes eliminar TOTS els tiquets i l'historial d'escanejos d'Entrades? Aquesta acció no es pot desfer.")) return;
@@ -399,7 +431,6 @@ $("dangerBtn").onclick = async () => {
     alert("S'han eliminat tots els registres d'Entrades.");
   } catch (e) { alert("Error: " + e.message); }
   $("dangerConfirm").value = ""; $("dangerBtn").textContent = "Elimina tots els tiquets d'Entrades";
-  $("dangerZone").classList.add("hide");
 };
 
 function listen() {
@@ -427,7 +458,8 @@ function sizesLine(sizes) {
 function sizesGridHtml(sizes) {
   const entries = Object.entries(sizes || {}).filter(([,q]) => q > 0);
   if (!entries.length) return "";
-  return `<div class="sizesGrid">` + entries.map(([s,q]) => `<div class="sizeChip"><b>${s}</b><span>${q}</span></div>`).join("") + `</div>`;
+  const rows = entries.map(([s,q]) => `<tr><td>${s}</td><td>${q}</td></tr>`).join("");
+  return `<table class="sizesTable"><thead><tr><th>Talla</th><th>Quantitat</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function beepS(ok) { ok ? beep(880,150) : beep(200,450); navigator.vibrate && navigator.vibrate(ok ? 80 : [200,100,200]); }
 
@@ -596,7 +628,6 @@ $("exportPendBtn").onclick = () => {
 };
 
 /* ---------- Zona perillosa: eliminar tots els registres (Samarretes) ---------- */
-$("dangerToggleS").onclick = () => $("dangerZoneS").classList.toggle("hide");
 $("dangerConfirmS").oninput = () => { $("dangerBtnS").disabled = $("dangerConfirmS").value.trim() !== "ESBORRA SAMARRETES"; };
 $("dangerBtnS").onclick = async () => {
   if (!confirm("Confirmes eliminar TOTES les comandes de Samarretes? Aquesta acció no es pot desfer.")) return;
@@ -611,13 +642,19 @@ $("dangerBtnS").onclick = async () => {
     alert("S'han eliminat totes les comandes de Samarretes.");
   } catch (e) { alert("Error: " + e.message); }
   $("dangerConfirmS").value = ""; $("dangerBtnS").textContent = "Elimina totes les comandes de Samarretes";
-  $("dangerZoneS").classList.add("hide");
 };
 
 function listenShirts() {
   unsubs.push(onSnapshot(collection(db, "shirt_orders"), snap => {
     shirtOrders = snap.docs.map(d => d.data()).sort((a,b) => a.code.localeCompare(b.code)); renderListS();
   }));
+}
+
+} catch (e) {
+  document.getElementById("loading").classList.add("hide");
+  document.body.insertAdjacentHTML("beforeend",
+    `<div id="fatalErr"><p>⚠️ Hi ha hagut un error carregant l'aplicació.</p><p class="muted">${String(e.message || e)}</p><button onclick="location.reload()">Tornar a carregar</button></div>`);
+  console.error(e);
 }
 </script>
 </body>

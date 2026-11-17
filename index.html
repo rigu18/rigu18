@@ -5,43 +5,46 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Control d'esdeveniments</title>
 <style>
-:root{--bg:#0f1114;--card:#191c21;--line:#2a2f36;--tx:#eceff3;--mut:#8a93a1;--ok:#17b26a;--err:#e5484d;--warn:#f0a020;--acc:#8ab4ff;--wait:#3b7cf0}
+:root{--bg:#000000;--card:#111318;--card2:#191c23;--line:#272b34;--tx:#f2f3f5;--mut:#98a0ab;--ok:#3fa877;--err:#d4635f;--warn:#c9a34a;--acc:#2546a6;--acchov:#3659c9;--wait:#2546a6}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
-h1{font-size:18px;margin:0}
+body{margin:0;min-height:100vh;background:radial-gradient(1200px 520px at 50% -15%,rgba(37,70,166,.22),transparent 60%),var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:#000;border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.1px;color:#fff}
 main{max-width:760px;margin:0 auto;padding:16px}
 nav{display:flex;gap:8px;margin-bottom:16px}
 button,input,textarea{font:inherit;color:inherit}
-button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;cursor:pointer}
-button:hover{border-color:var(--acc)}
-button.on{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
-button.main{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
-input,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px}
+button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:11px 15px;cursor:pointer;transition:border-color .15s ease,background .15s ease}
+button:hover{border-color:var(--mut);background:var(--card2)}
+button.on,button.main{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:700}
+button.on:hover,button.main:hover{background:var(--acchov);border-color:var(--acchov)}
+input,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px;transition:border-color .15s ease}
+input:focus,textarea:focus{border-color:var(--acc)}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 textarea{min-height:180px;font-family:ui-monospace,monospace}
 .hide{display:none!important}
 .row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
 .muted{color:var(--mut);font-size:14px}
-#reader,#readerS{width:100%;max-width:300px;aspect-ratio:1/1;margin:10px auto;border-radius:16px;overflow:hidden;position:relative;background:#000}
+#reader,#readerS{width:100%;max-width:300px;aspect-ratio:1/1;margin:10px auto;border-radius:12px;overflow:hidden;position:relative;background:#000;border:1px solid var(--line)}
 #reader video,#readerS video{width:100%!important;height:100%!important;object-fit:cover}
-#res{margin:16px 0;border-radius:14px;padding:28px 16px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px}
+#res{margin:16px 0;border-radius:12px;padding:28px 16px;text-align:center;background:var(--card);border:1px solid var(--line);min-height:150px}
 #res b{display:block;font-size:clamp(34px,10vw,56px);letter-spacing:.5px;line-height:1.1}
 #res span{display:block;margin-top:8px;font-size:18px;word-break:break-all}
-#res.ok{background:var(--ok);border-color:var(--ok);color:#04210f}
+#res.ok{background:var(--ok);border-color:var(--ok);color:#0f2419}
 #res.used{background:var(--err);border-color:var(--err);color:#fff}
-#res.bad{background:var(--warn);border-color:var(--warn);color:#2b1a00}
+#res.bad{background:var(--warn);border-color:var(--warn);color:#2a2008}
 .stats{display:flex;gap:8px;margin-bottom:12px}
 .stats div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
-.stats strong{display:block;font-size:26px}
-.rowbtn{padding:4px 8px;font-size:12px;margin:2px}
-table{width:100%;border-collapse:collapse;margin-top:8px}
-td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+.stats strong{display:block;font-size:26px;color:var(--tx)}
+.rowbtn{padding:5px 9px;font-size:12px;margin:2px;border-radius:6px}
+.tblwrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:8px;border-radius:8px}
+table{width:100%;border-collapse:collapse}
+td,th{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px;white-space:nowrap}
+th{background:var(--card2);font-size:12px;text-transform:uppercase;letter-spacing:.3px;color:var(--mut);font-weight:600}
 .tag{padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
-.t-ok{background:#12372a;color:#5be3a0}.t-used{background:#44181b;color:#ff8a8e}.t-bad{background:#44300a;color:#ffc861}.t-wait{background:#23272e;color:var(--mut)}
-#login{max-width:340px;margin:12vh auto;padding:16px}
+.t-ok{background:#1e3329;color:#8fd0ae}.t-used{background:#36211f;color:#e3a9a6}.t-bad{background:#352c1a;color:#d9c08a}.t-wait{background:#222222;color:var(--mut)}
+#login{max-width:340px;margin:12vh auto;padding:24px 22px;background:var(--card);border:1px solid var(--line);border-radius:12px}
 #login input{margin:6px 0}
-.err{color:#ff8a8e;font-size:14px;min-height:20px}
+.err{color:#e3a9a6;font-size:14px;min-height:20px}
 #loading{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
 .spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -53,9 +56,9 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
 #drawer.open{transform:translateX(0)}
 #drawer h2{font-size:14px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin:0 0 14px}
 .navlink{width:100%;text-align:left;margin-bottom:8px;background:transparent;font-size:15px}
-.navlink.on{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
+.navlink.on{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:600}
 #backHomeBtn{margin-top:auto}
-#resS{margin:16px 0;border-radius:14px;padding:24px 16px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px}
+#resS{margin:16px 0;border-radius:12px;padding:24px 16px;text-align:center;background:var(--card);border:1px solid var(--line);min-height:150px}
 #resS b{display:block;font-size:clamp(22px,6vw,32px);line-height:1.2}
 #resS span{display:block;margin-top:6px;font-size:17px;word-break:break-all}
 .sizesTable{width:100%;max-width:320px;margin:14px auto 0;border-collapse:collapse;background:rgba(255,255,255,.14);border-radius:10px;overflow:hidden}
@@ -64,20 +67,21 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
 .sizesTable td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.18);font-size:19px;font-weight:600}
 .sizesTable td:last-child{font-size:26px;font-weight:800}
 .sizesTable tr:last-child td{border-bottom:none}
-#resS.wait{background:var(--wait);border-color:var(--wait);color:#eef4ff}
+#resS.wait{background:var(--wait);border-color:var(--wait);color:#fff}
 #resS.used{background:var(--err);border-color:var(--err);color:#fff}
-#resS.bad{background:var(--warn);border-color:var(--warn);color:#2b1a00}
+#resS.bad{background:var(--warn);border-color:var(--warn);color:#2a2008}
 .sizesTot{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
 .sizesTot span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
 #home{max-width:700px;margin:0 auto;padding:16px}
-#home header{border:none;padding:16px 0 20px}
-.eventCard{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+#home header{border:none;background:none;position:static;padding:16px 0 20px}
+.eventCard{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px;transition:border-color .15s ease}
+.eventCard:hover{border-color:var(--mut)}
 .eventCard b{display:block;font-size:16px}
 .eventCard span{color:var(--mut);font-size:13px}
 #newEventForm{border:1px dashed var(--line);border-radius:10px;padding:14px;margin-top:20px}
 .typePick{display:flex;gap:8px;margin:10px 0}
 .typePick button{flex:1}
-.typePick button.sel{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
+.typePick button.sel{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:600}
 </style>
 </head>
 <body>
@@ -151,7 +155,7 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
         <div id="reader"></div>
         <div id="res" aria-live="assertive"><b>—</b><span>Esperant un escaneig</span></div>
         <h3>Últims escanejos</h3>
-        <table><tbody id="recent"></tbody></table>
+        <div class="tblwrap"><table style="min-width:360px"><tbody id="recent"></tbody></table></div>
       </section>
 
       <section id="t-list" class="hide">
@@ -161,7 +165,7 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
           <div><strong id="sPen">0</strong><span class="muted">Pendents</span></div>
         </div>
         <input id="filter" placeholder="Cercar codi...">
-        <table><thead><tr><th>Codi</th><th>Estat</th><th>Hora d'escaneig</th><th>Accions</th></tr></thead><tbody id="rows"></tbody></table>
+        <div class="tblwrap"><table style="min-width:520px"><thead><tr><th>Codi</th><th>Estat</th><th>Hora d'escaneig</th><th>Accions</th></tr></thead><tbody id="rows"></tbody></table></div>
       </section>
     </div>
 
@@ -193,7 +197,7 @@ td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-s
         <div class="muted">Total per talla (pendents de recollir):</div>
         <div class="sizesTot" id="sizesTotal"></div>
         <input id="filterS" placeholder="Cercar per codi o nom...">
-        <table><thead><tr><th>Codi</th><th>Nom</th><th>Talles</th><th>Estat</th><th>Hora recollida</th><th>Accions</th></tr></thead><tbody id="rowsS"></tbody></table>
+        <div class="tblwrap"><table style="min-width:720px"><thead><tr><th>Codi</th><th>Nom</th><th>Talles</th><th>Estat</th><th>Hora recollida</th><th>Accions</th></tr></thead><tbody id="rowsS"></tbody></table></div>
       </section>
     </div>
 

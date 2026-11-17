@@ -3,81 +3,81 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Control d'entrades</title>
+<title>Control d'esdeveniments</title>
 <style>
-:root{--bg:#0a0c12;--card:#141824;--card2:#1b2130;--line:#272e3d;--tx:#eef1f8;--mut:#8d96ac;--ok:#22c55e;--err:#fb3a5d;--warn:#f5a623;--acc:#6d5bff;--acc2:#22d3ee;--wait:#4f74f5}
+:root{--bg:#0f1114;--card:#191c21;--line:#2a2f36;--tx:#eceff3;--mut:#8a93a1;--ok:#17b26a;--err:#e5484d;--warn:#f0a020;--acc:#8ab4ff;--wait:#3b7cf0}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:radial-gradient(900px 500px at 50% -8%,rgba(109,91,255,.22),transparent 60%),var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
-header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(10,12,18,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-h1{font-size:19px;margin:0;font-weight:800;letter-spacing:.2px;background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
-main{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-variant-numeric:tabular-nums}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--line)}
+h1{font-size:18px;margin:0}
+main{max-width:760px;margin:0 auto;padding:16px}
 nav{display:flex;gap:8px;margin-bottom:16px}
-button,input,textarea,select{font:inherit;color:inherit}
-button{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer;transition:transform .12s ease,border-color .15s ease,box-shadow .15s ease,background .15s ease}
-button:hover{border-color:var(--acc);background:var(--card2)}
-button:active{transform:scale(.97)}
-button.on,button.main{background:linear-gradient(135deg,var(--acc),#8d6bff);color:#fff;border-color:transparent;font-weight:700;box-shadow:0 6px 18px rgba(109,91,255,.35)}
-button.on:hover,button.main:hover{box-shadow:0 8px 22px rgba(109,91,255,.5)}
-input,textarea,select{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;transition:border-color .15s ease,box-shadow .15s ease}
-input:focus,textarea:focus,select:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(109,91,255,.22)}
+button,input,textarea{font:inherit;color:inherit}
+button{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;cursor:pointer}
+button:hover{border-color:var(--acc)}
+button.on{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
+button.main{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
+input,textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:12px}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 textarea{min-height:180px;font-family:ui-monospace,monospace}
 .hide{display:none!important}
 .row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
 .muted{color:var(--mut);font-size:14px}
-#reader,#readerS{width:100%;max-width:300px;aspect-ratio:1/1;margin:14px auto;border-radius:20px;overflow:hidden;position:relative;background:#000;border:2px solid var(--line);box-shadow:0 10px 30px rgba(0,0,0,.45)}
+#reader,#readerS{width:100%;max-width:300px;aspect-ratio:1/1;margin:10px auto;border-radius:16px;overflow:hidden;position:relative;background:#000}
 #reader video,#readerS video{width:100%!important;height:100%!important;object-fit:cover}
-#res,#resS{margin:16px 0;border-radius:20px;padding:28px 18px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:background .15s ease,border-color .15s ease}
-#res b{display:block;font-size:clamp(32px,9vw,52px);letter-spacing:.3px;line-height:1.1}
-#resS b{display:block;font-size:clamp(21px,5.5vw,30px);line-height:1.25;font-weight:800}
-#res span,#resS span{display:block;margin-top:8px;font-size:17px;word-break:break-all}
-#res.ok,#resS.ok{background:var(--ok);border-color:var(--ok);color:#06240f}
-#res.used,#resS.used{background:var(--err);border-color:var(--err);color:#fff}
-#res.bad,#resS.bad{background:var(--warn);border-color:var(--warn);color:#2b1a00}
-#resS.wait{background:var(--wait);border-color:var(--wait);color:#eef4ff}
-#res.ok b::before{content:"✅ "}
-#res.used b::before{content:"⛔ "}
-#res.bad b::before{content:"⚠️ "}
-#resS.wait b::before{content:"⏳ "}
-#resS.used b::before{content:"⛔ "}
-#resS.bad b::before{content:"⚠️ "}
-.stats{display:flex;gap:10px;margin-bottom:14px}
-.stats div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center}
-.stats strong{display:block;font-size:26px;color:var(--acc2)}
-.rowbtn{padding:5px 10px;font-size:12px;margin:2px;border-radius:8px}
-table{width:100%;border-collapse:collapse;margin-top:10px;background:var(--card);border-radius:14px;overflow:hidden}
-td,th{padding:10px 10px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
-th{background:rgba(109,91,255,.12);font-size:12px;text-transform:uppercase;letter-spacing:.4px;color:var(--mut)}
-tbody tr:hover{background:var(--card2)}
-.tag{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
-.t-ok{background:rgba(34,197,94,.18);color:#5be3a0}.t-used{background:rgba(251,58,93,.18);color:#ff8a9c}.t-bad{background:rgba(245,166,35,.18);color:#ffc861}.t-wait{background:rgba(141,150,172,.16);color:var(--mut)}
-#login{max-width:360px;margin:12vh auto;padding:28px 24px;background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 50px rgba(0,0,0,.45)}
-#login input{margin:8px 0}
-.err{color:#ff8a9c;font-size:14px;min-height:20px}
+#res{margin:16px 0;border-radius:14px;padding:28px 16px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px}
+#res b{display:block;font-size:clamp(34px,10vw,56px);letter-spacing:.5px;line-height:1.1}
+#res span{display:block;margin-top:8px;font-size:18px;word-break:break-all}
+#res.ok{background:var(--ok);border-color:var(--ok);color:#04210f}
+#res.used{background:var(--err);border-color:var(--err);color:#fff}
+#res.bad{background:var(--warn);border-color:var(--warn);color:#2b1a00}
+.stats{display:flex;gap:8px;margin-bottom:12px}
+.stats div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.stats strong{display:block;font-size:26px}
+.rowbtn{padding:4px 8px;font-size:12px;margin:2px}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:14px}
+.tag{padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
+.t-ok{background:#12372a;color:#5be3a0}.t-used{background:#44181b;color:#ff8a8e}.t-bad{background:#44300a;color:#ffc861}.t-wait{background:#23272e;color:var(--mut)}
+#login{max-width:340px;margin:12vh auto;padding:16px}
+#login input{margin:6px 0}
+.err{color:#ff8a8e;font-size:14px;min-height:20px}
 #loading{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:20px}
-.spinner{width:38px;height:38px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin .9s linear infinite}
+.spinner{width:36px;height:36px;border:3px solid var(--line);border-top-color:var(--acc);border-radius:50%;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #fatalErr{min-height:70vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px}
-#hamburger{background:none;border:none;font-size:22px;line-height:1;padding:6px 10px;cursor:pointer;border-radius:10px}
-#hamburger:hover{background:var(--card2);border-color:transparent}
-#overlay{position:fixed;inset:0;background:rgba(5,6,10,.6);backdrop-filter:blur(2px);z-index:40;display:none}
+#hamburger{background:none;border:none;font-size:22px;line-height:1;padding:6px 8px;cursor:pointer}
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:40;display:none}
 #overlay.show{display:block}
-#drawer{position:fixed;top:0;left:0;height:100%;width:270px;max-width:82vw;background:#10131c;border-right:1px solid var(--line);z-index:50;transform:translateX(-100%);transition:transform .25s ease;display:flex;flex-direction:column;padding:20px 16px;overflow-y:auto;box-shadow:12px 0 40px rgba(0,0,0,.4)}
+#drawer{position:fixed;top:0;left:0;height:100%;width:260px;max-width:80vw;background:var(--card);border-right:1px solid var(--line);z-index:50;transform:translateX(-100%);transition:transform .22s ease;display:flex;flex-direction:column;padding:18px 14px;overflow-y:auto}
 #drawer.open{transform:translateX(0)}
-#drawer h2{font-size:13px;color:var(--mut);text-transform:uppercase;letter-spacing:.6px;margin:4px 0 16px}
-.navlink{width:100%;text-align:left;margin-bottom:8px;background:transparent;border-color:transparent;font-size:15px;padding:12px 14px}
-.navlink:hover{background:var(--card2);border-color:transparent}
-.navlink.on{background:linear-gradient(135deg,var(--acc),#8d6bff);color:#fff;border-color:transparent;font-weight:700;box-shadow:0 6px 18px rgba(109,91,255,.35)}
-#logoutBtn{margin-top:auto;background:transparent;border:1px solid var(--line);color:var(--mut)}
-#logoutBtn:hover{border-color:var(--err);color:#ff8a9c;background:var(--card2)}
-.sizesTable{width:100%;max-width:320px;margin:14px auto 0;border-collapse:collapse;background:rgba(255,255,255,.14);border-radius:14px;overflow:hidden}
-.sizesTable th{background:transparent;font-size:12px;text-transform:uppercase;letter-spacing:.6px;opacity:.9;font-weight:700;padding:8px 14px;border-bottom:2px solid rgba(255,255,255,.35);text-align:left;color:inherit}
+#drawer h2{font-size:14px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px;margin:0 0 14px}
+.navlink{width:100%;text-align:left;margin-bottom:8px;background:transparent;font-size:15px}
+.navlink.on{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
+#backHomeBtn{margin-top:auto}
+#resS{margin:16px 0;border-radius:14px;padding:24px 16px;text-align:center;background:var(--card);border:2px solid var(--line);min-height:150px}
+#resS b{display:block;font-size:clamp(22px,6vw,32px);line-height:1.2}
+#resS span{display:block;margin-top:6px;font-size:17px;word-break:break-all}
+.sizesTable{width:100%;max-width:320px;margin:14px auto 0;border-collapse:collapse;background:rgba(255,255,255,.14);border-radius:10px;overflow:hidden}
+.sizesTable th{font-size:12px;text-transform:uppercase;letter-spacing:.6px;opacity:.85;font-weight:700;padding:7px 14px;border-bottom:2px solid rgba(255,255,255,.35);text-align:left}
 .sizesTable th:last-child,.sizesTable td:last-child{text-align:right}
 .sizesTable td{padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.18);font-size:19px;font-weight:600}
 .sizesTable td:last-child{font-size:26px;font-weight:800}
 .sizesTable tr:last-child td{border-bottom:none}
+#resS.wait{background:var(--wait);border-color:var(--wait);color:#eef4ff}
+#resS.used{background:var(--err);border-color:var(--err);color:#fff}
+#resS.bad{background:var(--warn);border-color:var(--warn);color:#2b1a00}
 .sizesTot{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
-.sizesTot span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px}
+.sizesTot span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px}
+#home{max-width:700px;margin:0 auto;padding:16px}
+#home header{border:none;padding:16px 0 20px}
+.eventCard{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.eventCard b{display:block;font-size:16px}
+.eventCard span{color:var(--mut);font-size:13px}
+#newEventForm{border:1px dashed var(--line);border-radius:10px;padding:14px;margin-top:20px}
+.typePick{display:flex;gap:8px;margin:10px 0}
+.typePick button{flex:1}
+.typePick button.sel{background:var(--acc);color:#0b1220;border-color:var(--acc);font-weight:600}
 </style>
 </head>
 <body>
@@ -88,7 +88,7 @@ tbody tr:hover{background:var(--card2)}
 </div>
 
 <section id="login" class="hide">
-  <h1>Control d'entrades</h1>
+  <h1>Control d'esdeveniments</h1>
   <p class="muted">Inicia sessió amb l'usuari que has creat a Firebase.</p>
   <form id="lf">
     <input id="em" type="email" placeholder="Correu electrònic" required autocomplete="username">
@@ -98,119 +98,150 @@ tbody tr:hover{background:var(--card2)}
   </form>
 </section>
 
+<div id="home" class="hide">
+  <header style="display:flex;justify-content:space-between;align-items:center">
+    <h1>Els meus esdeveniments</h1>
+    <button id="logoutBtnHome">🔒 Tancar sessió</button>
+  </header>
+  <div id="eventList"></div>
+  <div id="newEventForm">
+    <h3 style="margin-top:0">Crear un esdeveniment nou</h3>
+    <input id="newEventName" placeholder="Nom de l'esdeveniment (p. ex. Concert Festa Major)">
+    <div class="typePick">
+      <button class="sel" data-type="entrades">🎫 Entrades</button>
+      <button data-type="samarretes">👕 Samarretes</button>
+    </div>
+    <button id="createEventBtn" class="main" style="width:100%">Crear esdeveniment</button>
+    <p id="newEventMsg" class="muted"></p>
+  </div>
+</div>
+
 <div id="app" class="hide">
 <header>
-  <div style="display:flex;align-items:center;gap:8px">
+  <div style="display:flex;align-items:center;gap:8px;min-width:0">
     <button id="hamburger" aria-label="Menú">☰</button>
-    <h1>Control d'entrades</h1>
+    <h1 id="evTitle" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Esdeveniment</h1>
   </div>
 </header>
 
 <div id="overlay"></div>
 <div id="drawer">
   <h2>Menú</h2>
-  <button class="navlink on" data-v="scan">🎫 Escanejar Entrades</button>
-  <button class="navlink" data-v="list">📋 Llistat Entrades</button>
-  <button class="navlink" data-v="scanS">👕 Escanejar Samarretes</button>
-  <button class="navlink" data-v="listS">📋 Llistat Samarretes</button>
-  <button class="navlink" data-v="gestio">⚙️ Gestionar dades</button>
+  <button class="navlink on" data-v="workspace">📲 Escaneig i llistat</button>
+  <button class="navlink" data-v="gestio">⚙️ Gestió de dades</button>
+  <button id="backHomeBtn">🏠 Tornar a l'inici</button>
   <button id="logoutBtn">🔒 Tancar sessió</button>
 </div>
 
 <main>
-  <section id="t-scan">
-    <p class="muted">Lector físic: deixa el cursor al camp i escaneja. Mòbil: activa la càmera.</p>
-    <input id="manual" placeholder="Codi de barres (lector físic o escriure a mà + Enter)" autocomplete="off" inputmode="text">
-    <div class="row">
-      <button id="camBtn" class="main">Activar càmera</button>
-    </div>
-    <div id="reader"></div>
-    <div id="res" aria-live="assertive"><b>—</b><span>Esperant un escaneig</span></div>
-    <h3>Últims escanejos</h3>
-    <table><tbody id="recent"></tbody></table>
-  </section>
+  <div id="workspace">
 
-  <section id="t-list" class="hide">
-    <div class="stats">
-      <div><strong id="sTot">0</strong><span class="muted">Total</span></div>
-      <div><strong id="sOk">0</strong><span class="muted">Entrats</span></div>
-      <div><strong id="sPen">0</strong><span class="muted">Pendents</span></div>
-    </div>
-    <input id="filter" placeholder="Cercar codi...">
-    <table><thead><tr><th>Codi</th><th>Estat</th><th>Hora d'escaneig</th><th>Accions</th></tr></thead><tbody id="rows"></tbody></table>
-  </section>
+    <div id="entradesWorkspace">
+      <nav>
+        <button data-t="scan" class="on">Escanejar</button>
+        <button data-t="list">Llistat</button>
+      </nav>
 
-  <section id="t-scanS" class="hide">
-    <p class="muted">Lector físic: deixa el cursor al camp i escaneja. Mòbil: activa la càmera.</p>
-    <input id="manualS" placeholder="Codi de barres o QR (lector físic o escriure a mà + Enter)" autocomplete="off" inputmode="text">
-    <div class="row">
-      <button id="camBtnS" class="main">Activar càmera</button>
-    </div>
-    <div id="readerS"></div>
-    <div id="resS" aria-live="assertive"><b>—</b><span>Esperant un escaneig</span></div>
-  </section>
+      <section id="t-scan">
+        <p class="muted">Lector físic: deixa el cursor al camp i escaneja. Mòbil: activa la càmera.</p>
+        <input id="manual" placeholder="Codi de barres (lector físic o escriure a mà + Enter)" autocomplete="off" inputmode="text">
+        <div class="row">
+          <button id="camBtn" class="main">Activar càmera</button>
+        </div>
+        <div id="reader"></div>
+        <div id="res" aria-live="assertive"><b>—</b><span>Esperant un escaneig</span></div>
+        <h3>Últims escanejos</h3>
+        <table><tbody id="recent"></tbody></table>
+      </section>
 
-  <section id="t-listS" class="hide">
-    <div class="stats">
-      <div><strong id="sTotS">0</strong><span class="muted">Comandes</span></div>
-      <div><strong id="sOkS">0</strong><span class="muted">Recollides</span></div>
-      <div><strong id="sPenS">0</strong><span class="muted">Pendents</span></div>
-    </div>
-    <div class="row">
-      <button id="exportPendBtn">⬇️ Exportar pendents a Excel</button>
-    </div>
-    <div class="muted">Total per talla (pendents de recollir):</div>
-    <div class="sizesTot" id="sizesTotal"></div>
-    <input id="filterS" placeholder="Cercar per codi o nom...">
-    <table><thead><tr><th>Codi</th><th>Nom</th><th>Talles</th><th>Estat</th><th>Hora recollida</th><th>Accions</th></tr></thead><tbody id="rowsS"></tbody></table>
-  </section>
-
-  <div id="mode-gestio" class="hide">
-  <nav>
-    <button data-t="gestE" class="on">Entrades</button>
-    <button data-t="gestS">Samarretes</button>
-  </nav>
-
-  <section id="t-gestE">
-    <h3>Importar codis</h3>
-    <p>Enganxa els codis (un per línia, o separats per comes) o puja un fitxer .csv / .txt <b>sense capçalera</b>.</p>
-    <textarea id="codes" placeholder="8412345678901&#10;8412345678902&#10;..."></textarea>
-    <div class="row">
-      <input type="file" id="file" accept=".csv,.txt" style="width:auto">
-      <button id="impBtn" class="main">Importar codis</button>
-    </div>
-    <p id="impMsg" class="muted"></p>
-
-    <h3>Afegir un codi individual</h3>
-    <div class="row">
-      <input id="addCode" placeholder="Afegir un codi nou...">
-      <button id="addBtn">Afegir</button>
+      <section id="t-list" class="hide">
+        <div class="stats">
+          <div><strong id="sTot">0</strong><span class="muted">Total</span></div>
+          <div><strong id="sOk">0</strong><span class="muted">Entrats</span></div>
+          <div><strong id="sPen">0</strong><span class="muted">Pendents</span></div>
+        </div>
+        <input id="filter" placeholder="Cercar codi...">
+        <table><thead><tr><th>Codi</th><th>Estat</th><th>Hora d'escaneig</th><th>Accions</th></tr></thead><tbody id="rows"></tbody></table>
+      </section>
     </div>
 
-    <h3 style="color:var(--err)">⚠️ Zona perillosa</h3>
-    <div style="border:1px dashed var(--err);border-radius:10px;padding:12px">
-      <p class="muted">Això eliminarà <b>TOTS</b> els tiquets i l'historial d'escanejos d'Entrades. Només afecta Entrades, no Samarretes. No es pot desfer.</p>
-      <input id="dangerConfirm" placeholder='Escriu ESBORRA ENTRADES per confirmar'>
-      <div class="row"><button id="dangerBtn" disabled>Elimina tots els tiquets d'Entrades</button></div>
-    </div>
-  </section>
+    <div id="samarretesWorkspace" class="hide">
+      <nav>
+        <button data-t="scanS" class="on">Escanejar</button>
+        <button data-t="listS">Llistat</button>
+      </nav>
 
-  <section id="t-gestS" class="hide">
-    <h3>Importar Excel</h3>
-    <p>Puja l'Excel (.xlsx) amb les columnes: codi, nom, i a continuació una columna per talla (1/2, 3/4, 5/6, 7/8, 9/10, 11/12, S, M, L, XL, 2XL, 3XL) amb la quantitat de cada una.</p>
-    <div class="row">
-      <input type="file" id="fileS" accept=".xlsx,.xls">
-    </div>
-    <p id="impSMsg" class="muted"></p>
-    <button id="impSBtn" class="main hide">Importar a Firebase</button>
+      <section id="t-scanS">
+        <p class="muted">Lector físic: deixa el cursor al camp i escaneja. Mòbil: activa la càmera.</p>
+        <input id="manualS" placeholder="Codi de barres o QR (lector físic o escriure a mà + Enter)" autocomplete="off" inputmode="text">
+        <div class="row">
+          <button id="camBtnS" class="main">Activar càmera</button>
+        </div>
+        <div id="readerS"></div>
+        <div id="resS" aria-live="assertive"><b>—</b><span>Esperant un escaneig</span></div>
+      </section>
 
-    <h3 style="color:var(--err)">⚠️ Zona perillosa</h3>
-    <div style="border:1px dashed var(--err);border-radius:10px;padding:12px">
-      <p class="muted">Això eliminarà <b>TOTES</b> les comandes de Samarretes. Només afecta Samarretes, no Entrades. No es pot desfer.</p>
-      <input id="dangerConfirmS" placeholder='Escriu ESBORRA SAMARRETES per confirmar'>
-      <div class="row"><button id="dangerBtnS" disabled>Elimina totes les comandes de Samarretes</button></div>
+      <section id="t-listS" class="hide">
+        <div class="stats">
+          <div><strong id="sTotS">0</strong><span class="muted">Comandes</span></div>
+          <div><strong id="sOkS">0</strong><span class="muted">Recollides</span></div>
+          <div><strong id="sPenS">0</strong><span class="muted">Pendents</span></div>
+        </div>
+        <div class="row">
+          <button id="exportPendBtn">⬇️ Exportar pendents a Excel</button>
+        </div>
+        <div class="muted">Total per talla (pendents de recollir):</div>
+        <div class="sizesTot" id="sizesTotal"></div>
+        <input id="filterS" placeholder="Cercar per codi o nom...">
+        <table><thead><tr><th>Codi</th><th>Nom</th><th>Talles</th><th>Estat</th><th>Hora recollida</th><th>Accions</th></tr></thead><tbody id="rowsS"></tbody></table>
+      </section>
     </div>
-  </section>
+
+  </div>
+
+  <div id="gestio" class="hide">
+    <h2 style="margin-top:0">Gestió de dades</h2>
+
+    <div id="gestio-entrades">
+      <h3>Importar codis</h3>
+      <p>Enganxa els codis (un per línia, o separats per comes) o puja un fitxer .csv / .txt <b>sense capçalera</b>.</p>
+      <textarea id="codes" placeholder="8412345678901&#10;8412345678902&#10;..."></textarea>
+      <div class="row">
+        <input type="file" id="file" accept=".csv,.txt" style="width:auto">
+        <button id="impBtn" class="main">Importar codis</button>
+      </div>
+      <p id="impMsg" class="muted"></p>
+
+      <h3>Afegir un codi individual</h3>
+      <div class="row">
+        <input id="addCode" placeholder="Afegir un codi nou...">
+        <button id="addBtn">Afegir</button>
+      </div>
+
+      <h3 style="color:var(--err)">⚠️ Eliminar dades</h3>
+      <div style="border:1px dashed var(--err);border-radius:10px;padding:12px">
+        <p class="muted">Això eliminarà <b>TOTS</b> els tiquets i l'historial d'escanejos d'aquest esdeveniment. L'esdeveniment en si NO s'esborrarà. No es pot desfer.</p>
+        <input id="dangerConfirm" placeholder='Escriu el nom de l&#39;esdeveniment per confirmar'>
+        <div class="row"><button id="dangerBtn" disabled>Elimina totes les dades d'aquest esdeveniment</button></div>
+      </div>
+    </div>
+
+    <div id="gestio-samarretes" class="hide">
+      <h3>Importar Excel</h3>
+      <p>Puja l'Excel (.xlsx) amb les columnes: codi, nom, i a continuació una columna per talla (1/2, 3/4, 5/6, 7/8, 9/10, 11/12, S, M, L, XL, 2XL, 3XL) amb la quantitat de cada una.</p>
+      <div class="row">
+        <input type="file" id="fileS" accept=".xlsx,.xls">
+      </div>
+      <p id="impSMsg" class="muted"></p>
+      <button id="impSBtn" class="main hide">Importar a Firebase</button>
+
+      <h3 style="color:var(--err)">⚠️ Eliminar dades</h3>
+      <div style="border:1px dashed var(--err);border-radius:10px;padding:12px">
+        <p class="muted">Això eliminarà <b>TOTES</b> les comandes d'aquest esdeveniment. L'esdeveniment en si NO s'esborrarà. No es pot desfer.</p>
+        <input id="dangerConfirmS" placeholder='Escriu el nom de l&#39;esdeveniment per confirmar'>
+        <div class="row"><button id="dangerBtnS" disabled>Elimina totes les dades d'aquest esdeveniment</button></div>
+      </div>
+    </div>
   </div>
 </main>
 </div>
@@ -242,6 +273,9 @@ const $ = id => document.getElementById(id);
 const fmt = d => d ? d.toLocaleString("ca-ES",{dateStyle:"short",timeStyle:"medium"}) : "";
 const toDate = t => t && t.toDate ? t.toDate() : (t instanceof Date ? t : null);
 let unsubs = [];
+let currentEvent = null; // {id, name, type}
+function evCol(name) { return collection(db, "events", currentEvent.id, name); }
+function evDoc(name, id) { return doc(db, "events", currentEvent.id, name, id); }
 
 /* ---------- Sessió ---------- */
 let authResolved = false;
@@ -250,10 +284,14 @@ onAuthStateChanged(auth, user => {
   authResolved = true;
   $("loading").classList.add("hide");
   $("login").classList.toggle("hide", !!user);
-  $("app").classList.toggle("hide", !user);
+  $("home").classList.toggle("hide", !user);
+  $("app").classList.add("hide");
   unsubs.forEach(u => u()); unsubs = [];
-  if (user) { listen(); listenShirts(); $("manual").focus(); } else { stopCam(); stopCamS(); }
-  void document.body.offsetHeight; // força un repintat (alguns mòbils es queden en blanc si no)
+  if (unsubEvents) { unsubEvents(); unsubEvents = null; }
+  stopCam(); stopCamS();
+  currentEvent = null;
+  if (user) { listenEvents(); } else { events = []; }
+  void document.body.offsetHeight;
 });
 $("lf").onsubmit = async e => {
   e.preventDefault(); $("lerr").textContent = "";
@@ -261,31 +299,109 @@ $("lf").onsubmit = async e => {
   catch { $("lerr").textContent = "Correu o contrasenya incorrectes."; }
 };
 $("logoutBtn").onclick = () => { closeDrawer(); signOut(auth); };
+$("logoutBtnHome").onclick = () => signOut(auth);
 
-/* ---------- Pestanyes internes de "Gestionar dades" ---------- */
-document.querySelectorAll("nav button").forEach(b => b.onclick = () => {
-  b.closest("nav").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
-  ["gestE","gestS"].forEach(t => { const el = $("t-"+t); if (el) el.classList.toggle("hide", t !== b.dataset.t); });
+/* ================= HOME: LLISTA I CREACIÓ D'ESDEVENIMENTS ================= */
+let events = [];
+let unsubEvents = null;
+function renderEvents() {
+  const list = $("eventList");
+  if (!events.length) { list.innerHTML = '<p class="muted">Encara no has creat cap esdeveniment. Crea\'n un aquí sota.</p>'; return; }
+  list.innerHTML = "";
+  events.forEach(ev => {
+    const b = document.createElement("button");
+    b.className = "eventCard";
+    b.innerHTML = `<b>${ev.type === "samarretes" ? "👕" : "🎫"} ${ev.name}</b><span>${ev.type === "samarretes" ? "Recollida de samarretes" : "Control d'entrades"}</span>`;
+    b.onclick = () => enterEvent(ev);
+    list.appendChild(b);
+  });
+}
+function listenEvents() {
+  if (unsubEvents) unsubEvents();
+  unsubEvents = onSnapshot(collection(db, "events"), snap => {
+    events = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    renderEvents();
+  });
+}
+let selectedType = "entrades";
+document.querySelectorAll(".typePick button").forEach(b => b.onclick = () => {
+  selectedType = b.dataset.type;
+  document.querySelectorAll(".typePick button").forEach(x => x.classList.toggle("sel", x === b));
 });
+$("createEventBtn").onclick = async () => {
+  const name = $("newEventName").value.trim();
+  if (!name) { $("newEventMsg").textContent = "Posa un nom a l'esdeveniment."; return; }
+  $("createEventBtn").disabled = true; $("newEventMsg").textContent = "Creant...";
+  try {
+    const ref = await addDoc(collection(db, "events"), {name, type: selectedType, createdAt: serverTimestamp()});
+    $("newEventName").value = ""; $("newEventMsg").textContent = "";
+    enterEvent({id: ref.id, name, type: selectedType});
+  } catch (e) { $("newEventMsg").textContent = "Error: " + e.message; }
+  $("createEventBtn").disabled = false;
+};
+
+/* ---------- Entrar / sortir d'un esdeveniment ---------- */
+function enterEvent(ev) {
+  currentEvent = ev;
+  $("evTitle").textContent = (ev.type === "samarretes" ? "👕 " : "🎫 ") + ev.name;
+  $("entradesWorkspace").classList.toggle("hide", ev.type !== "entrades");
+  $("samarretesWorkspace").classList.toggle("hide", ev.type !== "samarretes");
+  $("gestio-entrades").classList.toggle("hide", ev.type !== "entrades");
+  $("gestio-samarretes").classList.toggle("hide", ev.type !== "samarretes");
+  $("dangerConfirm").placeholder = 'Escriu "' + ev.name + '" per confirmar';
+  $("dangerConfirmS").placeholder = 'Escriu "' + ev.name + '" per confirmar';
+  $("dangerConfirm").value = ""; $("dangerConfirmS").value = "";
+  $("dangerBtn").disabled = true; $("dangerBtnS").disabled = true;
+
+  $("workspace").classList.remove("hide"); $("gestio").classList.add("hide");
+  document.querySelectorAll(".navlink").forEach(x => x.classList.toggle("on", x.dataset.v === "workspace"));
+  if (ev.type === "entrades") {
+    $("t-scan").classList.remove("hide"); $("t-list").classList.add("hide");
+    $("entradesWorkspace").querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === "scan"));
+  } else {
+    $("t-scanS").classList.remove("hide"); $("t-listS").classList.add("hide");
+    $("samarretesWorkspace").querySelectorAll("nav button").forEach(b => b.classList.toggle("on", b.dataset.t === "scanS"));
+  }
+
+  $("home").classList.add("hide");
+  $("app").classList.remove("hide");
+
+  unsubs.forEach(u => u()); unsubs = [];
+  tickets = []; shirtOrders = [];
+  if (ev.type === "entrades") listen(); else listenShirts();
+}
+function leaveEvent() {
+  unsubs.forEach(u => u()); unsubs = [];
+  stopCam(); stopCamS();
+  currentEvent = null;
+  $("app").classList.add("hide");
+  $("home").classList.remove("hide");
+}
+$("backHomeBtn").onclick = () => { closeDrawer(); leaveEvent(); };
 
 /* ---------- Menú lateral (calaix) ---------- */
 function openDrawer() { $("drawer").classList.add("open"); $("overlay").classList.add("show"); }
 function closeDrawer() { $("drawer").classList.remove("open"); $("overlay").classList.remove("show"); }
 $("hamburger").onclick = () => $("drawer").classList.contains("open") ? closeDrawer() : openDrawer();
 $("overlay").onclick = closeDrawer;
-
-const VIEWS = ["scan", "list", "scanS", "listS", "gestio"];
-function showView(v) {
-  VIEWS.forEach(id => { const el = id === "gestio" ? $("mode-gestio") : $("t-" + id); if (el) el.classList.toggle("hide", id !== v); });
-  document.querySelectorAll(".navlink").forEach(b => b.classList.toggle("on", b.dataset.v === v));
-  stopCam(); stopCamS();
-  if (v === "scan") $("manual").focus();
-  else if (v === "scanS") $("manualS").focus();
+document.querySelectorAll(".navlink").forEach(b => b.onclick = () => {
+  const v = b.dataset.v;
+  $("workspace").classList.toggle("hide", v !== "workspace");
+  $("gestio").classList.toggle("hide", v !== "gestio");
+  document.querySelectorAll(".navlink").forEach(x => x.classList.toggle("on", x === b));
   closeDrawer();
-}
-document.querySelectorAll(".navlink").forEach(b => b.onclick = () => showView(b.dataset.v));
+});
 
-/* ---------- Validació (transacció: evita dobles entrades) ---------- */
+/* ---------- Pestanyes internes Escanejar / Llistat ---------- */
+document.querySelectorAll("#workspace nav button").forEach(b => b.onclick = () => {
+  b.closest("nav").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+  const t = b.dataset.t;
+  ["scan", "list", "scanS", "listS"].forEach(id => { const el = $("t-" + id); if (el) el.classList.toggle("hide", id !== t); });
+  if (t === "scan") $("manual").focus(); else stopCam();
+  if (t === "scanS") $("manualS").focus(); else stopCamS();
+});
+
+/* ================= ENTRADES ================= */
 function beep(freq, ms) {
   try {
     const c = new (window.AudioContext || window.webkitAudioContext)(), o = c.createOscillator();
@@ -302,7 +418,7 @@ function show(cls, title, line, code) {
 async function validate(raw, source) {
   const code = String(raw).trim();
   if (!code) return;
-  const ref = doc(db, "tickets", encodeURIComponent(code));
+  const ref = evDoc("tickets", encodeURIComponent(code));
   let r;
   try {
     r = await runTransaction(db, async tx => {
@@ -319,16 +435,13 @@ async function validate(raw, source) {
   if (r.st === "ok") show("ok", "VÀLID", "Entrada registrada a les " + fmt(new Date()), code);
   else if (r.st === "used") show("used", "JA ESCANEJAT", "Escanejat el " + (fmt(r.at) || "fa un moment"), code);
   else show("bad", "NO EXISTEIX", "Aquest codi no és a la llista d'entrades", code);
-  addDoc(collection(db, "scans"), {code, result: r.st, source, at: serverTimestamp()}).catch(() => {});
+  addDoc(evCol("scans"), {code, result: r.st, source, at: serverTimestamp()}).catch(() => {});
 }
-
-/* Lector físic: actua com un teclat i envia Enter al final */
 $("manual").addEventListener("keydown", e => {
   if (e.key === "Enter") { const v = e.target.value; e.target.value = ""; validate(v, "lector"); }
 });
 $("t-scan").addEventListener("click", e => { if (!["BUTTON","INPUT"].includes(e.target.tagName) && !cam) $("manual").focus(); });
 
-/* ---------- Càmera del mòbil ---------- */
 let cam = null, last = "", lastT = 0;
 async function startCam() {
   cam = new Html5Qrcode("reader", {
@@ -337,7 +450,7 @@ async function startCam() {
   });
   try {
     await cam.start({facingMode: "environment"}, {fps: 10, qrbox: {width: 230, height: 230}, aspectRatio: 1}, txt => {
-      if (txt === last && Date.now() - lastT < 3000) return; // evita lectures repetides
+      if (txt === last && Date.now() - lastT < 3000) return;
       last = txt; lastT = Date.now(); validate(txt, "mòbil");
     }, () => {});
     $("camBtn").textContent = "Aturar càmera";
@@ -351,18 +464,17 @@ async function stopCam() {
 }
 $("camBtn").onclick = () => cam ? stopCam() : startCam();
 
-/* ---------- Importar ---------- */
 $("file").onchange = async e => { const f = e.target.files[0]; if (f) $("codes").value = await f.text(); };
 $("impBtn").onclick = async () => {
   const list = [...new Set($("codes").value.split(/[\s,;]+/).map(s => s.trim()).filter(Boolean))];
   if (!list.length) { $("impMsg").textContent = "No hi ha cap codi."; return; }
   $("impBtn").disabled = true; $("impMsg").textContent = "Important...";
   try {
-    const existing = new Set((await getDocs(collection(db, "tickets"))).docs.map(d => d.id));
+    const existing = new Set((await getDocs(evCol("tickets"))).docs.map(d => d.id));
     const nous = list.filter(c => !existing.has(encodeURIComponent(c)));
     for (let i = 0; i < nous.length; i += 400) {
       const b = writeBatch(db);
-      nous.slice(i, i + 400).forEach(c => b.set(doc(db, "tickets", encodeURIComponent(c)),
+      nous.slice(i, i + 400).forEach(c => b.set(evDoc("tickets", encodeURIComponent(c)),
         {code: c, scanned: false, scannedAt: null, createdAt: serverTimestamp()}));
       await b.commit();
     }
@@ -372,7 +484,6 @@ $("impBtn").onclick = async () => {
   $("impBtn").disabled = false;
 };
 
-/* ---------- Llistat i historial en temps real ---------- */
 let tickets = [];
 function renderList() {
   const q = $("filter").value.trim().toLowerCase();
@@ -391,63 +502,61 @@ function renderList() {
   });
 }
 $("filter").oninput = renderList;
-
-/* ---------- Editar / eliminar / desfer / afegir individual ---------- */
+$("addCode").addEventListener("keydown", e => { if (e.key === "Enter") $("addBtn").click(); });
+$("addBtn").onclick = async () => {
+  const code = $("addCode").value.trim();
+  if (!code) return;
+  const ref = evDoc("tickets", encodeURIComponent(code));
+  if ((await getDoc(ref)).exists()) { alert("Aquest codi ja existeix."); return; }
+  await setDoc(ref, {code, scanned: false, scannedAt: null, createdAt: serverTimestamp()});
+  $("addCode").value = "";
+};
 $("rows").addEventListener("click", async e => {
   const b = e.target.closest("button"); if (!b) return;
   const code = b.dataset.code, act = b.dataset.act;
   try {
     if (act === "del") {
       if (!confirm(`Eliminar el codi ${code}? Aquesta acció no es pot desfer.`)) return;
-      await deleteDoc(doc(db, "tickets", encodeURIComponent(code)));
+      await deleteDoc(evDoc("tickets", encodeURIComponent(code)));
     } else if (act === "undo") {
       if (!confirm(`Desfer l'escaneig de ${code}? Tornarà a quedar pendent.`)) return;
-      await updateDoc(doc(db, "tickets", encodeURIComponent(code)), {scanned: false, scannedAt: null, scannedBy: null});
+      await updateDoc(evDoc("tickets", encodeURIComponent(code)), {scanned: false, scannedAt: null, scannedBy: null});
     } else if (act === "ren") {
       const nou = prompt("Nou codi:", code);
       if (!nou || !nou.trim() || nou.trim() === code) return;
       const nouCode = nou.trim();
-      const destRef = doc(db, "tickets", encodeURIComponent(nouCode));
+      const destRef = evDoc("tickets", encodeURIComponent(nouCode));
       if ((await getDoc(destRef)).exists()) { alert("Ja existeix un tiquet amb aquest codi."); return; }
       const t = tickets.find(x => x.code === code);
       await setDoc(destRef, {...t, code: nouCode});
-      await deleteDoc(doc(db, "tickets", encodeURIComponent(code)));
+      await deleteDoc(evDoc("tickets", encodeURIComponent(code)));
     }
   } catch (e) { alert("Error: " + e.message); }
 });
-$("addBtn").onclick = async () => {
-  const code = $("addCode").value.trim();
-  if (!code) return;
-  const ref = doc(db, "tickets", encodeURIComponent(code));
-  if ((await getDoc(ref)).exists()) { alert("Aquest codi ja existeix."); return; }
-  await setDoc(ref, {code, scanned: false, scannedAt: null, createdAt: serverTimestamp()});
-  $("addCode").value = "";
-};
-$("addCode").addEventListener("keydown", e => { if (e.key === "Enter") $("addBtn").click(); });
-/* ---------- Zona perillosa: eliminar tots els registres (Entrades) ---------- */
-$("dangerConfirm").oninput = () => { $("dangerBtn").disabled = $("dangerConfirm").value.trim() !== "ESBORRA ENTRADES"; };
+
+$("dangerConfirm").oninput = () => { $("dangerBtn").disabled = $("dangerConfirm").value.trim() !== currentEvent.name; };
 $("dangerBtn").onclick = async () => {
-  if (!confirm("Confirmes eliminar TOTS els tiquets i l'historial d'escanejos d'Entrades? Aquesta acció no es pot desfer.")) return;
+  if (!confirm("Confirmes eliminar TOTES les dades (tiquets i historial) d'aquest esdeveniment? Aquesta acció no es pot desfer.")) return;
   $("dangerBtn").disabled = true; $("dangerBtn").textContent = "Eliminant...";
   try {
     for (const coll of ["tickets", "scans"]) {
-      const docs = (await getDocs(collection(db, coll))).docs;
+      const docs = (await getDocs(evCol(coll))).docs;
       for (let i = 0; i < docs.length; i += 400) {
         const b = writeBatch(db);
         docs.slice(i, i + 400).forEach(d => b.delete(d.ref));
         await b.commit();
       }
     }
-    alert("S'han eliminat tots els registres d'Entrades.");
+    alert("S'han eliminat totes les dades d'aquest esdeveniment.");
   } catch (e) { alert("Error: " + e.message); }
-  $("dangerConfirm").value = ""; $("dangerBtn").textContent = "Elimina tots els tiquets d'Entrades";
+  $("dangerConfirm").value = ""; $("dangerBtn").textContent = "Elimina totes les dades d'aquest esdeveniment";
 };
 
 function listen() {
-  unsubs.push(onSnapshot(collection(db, "tickets"), snap => {
+  unsubs.push(onSnapshot(evCol("tickets"), snap => {
     tickets = snap.docs.map(d => d.data()).sort((a, b) => a.code.localeCompare(b.code)); renderList();
   }));
-  unsubs.push(onSnapshot(query(collection(db, "scans"), orderBy("at", "desc"), limit(15)), snap => {
+  unsubs.push(onSnapshot(query(evCol("scans"), orderBy("at", "desc"), limit(15)), snap => {
     const body = $("recent"); body.innerHTML = "";
     const names = {ok: ["Vàlid", "t-ok"], used: ["Ja escanejat", "t-used"], bad: ["No existeix", "t-bad"]};
     snap.docs.forEach(d => {
@@ -473,7 +582,6 @@ function sizesGridHtml(sizes) {
 }
 function beepS(ok) { ok ? beep(880,150) : beep(200,450); navigator.vibrate && navigator.vibrate(ok ? 80 : [200,100,200]); }
 
-/* --- Escaneig --- */
 let pendingOrderS = null;
 function showS(cls, title, sub, code, sizes, showPendingBtns, showCollectedBtns) {
   const r = $("resS"); r.className = cls;
@@ -497,7 +605,7 @@ function showS(cls, title, sub, code, sizes, showPendingBtns, showCollectedBtns)
   if (showCollectedBtns) {
     $("undoSBtn").onclick = async () => {
       if (!confirm("Desfer la recollida d'aquesta comanda? Tornarà a quedar pendent.")) return;
-      await updateDoc(doc(db, "shirt_orders", encodeURIComponent(code)), {status: "pending", collectedAt: null});
+      await updateDoc(evDoc("shirt_orders", encodeURIComponent(code)), {status: "pending", collectedAt: null});
       resetS();
     };
     $("closeSBtn").onclick = resetS;
@@ -507,7 +615,7 @@ function resetS() { const r = $("resS"); r.className = ""; r.innerHTML = "<b>—
 async function validateShirt(raw, source) {
   const code = String(raw).trim();
   if (!code || pendingOrderS) return;
-  const ref = doc(db, "shirt_orders", encodeURIComponent(code));
+  const ref = evDoc("shirt_orders", encodeURIComponent(code));
   let snap;
   try { snap = await getDoc(ref); }
   catch { showS("bad", "ERROR DE XARXA", "No s'ha pogut consultar. Torna-ho a provar.", code); beepS(false); return; }
@@ -527,7 +635,6 @@ $("manualS").addEventListener("keydown", e => {
 });
 $("t-scanS").addEventListener("click", e => { if (!["BUTTON","INPUT"].includes(e.target.tagName) && !camS) $("manualS").focus(); });
 
-/* --- Càmera (samarretes) --- */
 let camS = null, lastS = "", lastTS = 0;
 async function startCamS() {
   camS = new Html5Qrcode("readerS", {
@@ -548,7 +655,6 @@ async function stopCamS() {
 }
 $("camBtnS").onclick = () => camS ? stopCamS() : startCamS();
 
-/* --- Importar Excel --- */
 let pendingImportS = null;
 $("fileS").onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
@@ -575,11 +681,11 @@ $("impSBtn").onclick = async () => {
   if (!pendingImportS || !pendingImportS.length) return;
   $("impSBtn").disabled = true; $("impSMsg").textContent = "Important...";
   try {
-    const existing = new Set((await getDocs(collection(db, "shirt_orders"))).docs.map(d => d.id));
+    const existing = new Set((await getDocs(evCol("shirt_orders"))).docs.map(d => d.id));
     for (let i = 0; i < pendingImportS.length; i += 400) {
       const b = writeBatch(db);
       pendingImportS.slice(i, i + 400).forEach(o => {
-        const id = encodeURIComponent(o.code), ref = doc(db, "shirt_orders", id);
+        const id = encodeURIComponent(o.code), ref = evDoc("shirt_orders", id);
         if (existing.has(id)) b.set(ref, {code: o.code, name: o.name, sizes: o.sizes}, {merge: true});
         else b.set(ref, {code: o.code, name: o.name, sizes: o.sizes, status: "pending", collectedAt: null, createdAt: serverTimestamp()});
       });
@@ -591,7 +697,6 @@ $("impSBtn").onclick = async () => {
   $("impSBtn").disabled = false;
 };
 
-/* --- Llistat (samarretes) --- */
 let shirtOrders = [];
 function renderListS() {
   const q = $("filterS").value.trim().toLowerCase();
@@ -599,7 +704,7 @@ function renderListS() {
   $("sTotS").textContent = shirtOrders.length; $("sOkS").textContent = done; $("sPenS").textContent = shirtOrders.length - done;
   const totals = {};
   shirtOrders.filter(o => o.status !== "collected").forEach(o => Object.entries(o.sizes || {}).forEach(([s,v]) => totals[s] = (totals[s]||0) + v));
-  $("sizesTotal").innerHTML = SIZES.filter(s => totals[s]).map(s => `<span>${s}: ${totals[s]}</span>`).join("") || `<span class="muted">—</span>`;
+  $("sizesTotal").innerHTML = SIZES.filter(s => totals[s]).map(s => `<span>${s}: ${totals[s]}</span>`).join("") || '<span class="muted">—</span>';
   const body = $("rowsS"); body.innerHTML = "";
   shirtOrders.filter(o => !q || o.code.toLowerCase().includes(q) || (o.name||"").toLowerCase().includes(q)).slice(0, 500).forEach(o => {
     const tr = body.insertRow();
@@ -616,14 +721,14 @@ function renderListS() {
 $("filterS").oninput = renderListS;
 $("rowsS").addEventListener("click", async e => {
   const b = e.target.closest("button"); if (!b) return;
-  const code = b.dataset.code, act = b.dataset.act, ref = doc(db, "shirt_orders", encodeURIComponent(code));
+  const code = b.dataset.code, act = b.dataset.act, ref = evDoc("shirt_orders", encodeURIComponent(code));
   try {
     if (act === "delS") { if (confirm(`Eliminar la comanda de ${code}?`)) await deleteDoc(ref); }
     else if (act === "done") await updateDoc(ref, {status: "collected", collectedAt: serverTimestamp()});
     else if (act === "undo") await updateDoc(ref, {status: "pending", collectedAt: null});
   } catch (e) { alert("Error: " + e.message); }
 });
-/* --- Exportar pendents a Excel --- */
+
 $("exportPendBtn").onclick = () => {
   const pend = shirtOrders.filter(o => o.status !== "collected");
   if (!pend.length) { alert("No hi ha cap comanda pendent de recollir."); return; }
@@ -637,25 +742,24 @@ $("exportPendBtn").onclick = () => {
   XLSX.writeFile(wb, `samarretes_pendents_${data}.xlsx`);
 };
 
-/* ---------- Zona perillosa: eliminar tots els registres (Samarretes) ---------- */
-$("dangerConfirmS").oninput = () => { $("dangerBtnS").disabled = $("dangerConfirmS").value.trim() !== "ESBORRA SAMARRETES"; };
+$("dangerConfirmS").oninput = () => { $("dangerBtnS").disabled = $("dangerConfirmS").value.trim() !== currentEvent.name; };
 $("dangerBtnS").onclick = async () => {
-  if (!confirm("Confirmes eliminar TOTES les comandes de Samarretes? Aquesta acció no es pot desfer.")) return;
+  if (!confirm("Confirmes eliminar TOTES les comandes d'aquest esdeveniment? Aquesta acció no es pot desfer.")) return;
   $("dangerBtnS").disabled = true; $("dangerBtnS").textContent = "Eliminant...";
   try {
-    const docs = (await getDocs(collection(db, "shirt_orders"))).docs;
+    const docs = (await getDocs(evCol("shirt_orders"))).docs;
     for (let i = 0; i < docs.length; i += 400) {
       const b = writeBatch(db);
       docs.slice(i, i + 400).forEach(d => b.delete(d.ref));
       await b.commit();
     }
-    alert("S'han eliminat totes les comandes de Samarretes.");
+    alert("S'han eliminat totes les dades d'aquest esdeveniment.");
   } catch (e) { alert("Error: " + e.message); }
-  $("dangerConfirmS").value = ""; $("dangerBtnS").textContent = "Elimina totes les comandes de Samarretes";
+  $("dangerConfirmS").value = ""; $("dangerBtnS").textContent = "Elimina totes les dades d'aquest esdeveniment";
 };
 
 function listenShirts() {
-  unsubs.push(onSnapshot(collection(db, "shirt_orders"), snap => {
+  unsubs.push(onSnapshot(evCol("shirt_orders"), snap => {
     shirtOrders = snap.docs.map(d => d.data()).sort((a,b) => a.code.localeCompare(b.code)); renderListS();
   }));
 }
